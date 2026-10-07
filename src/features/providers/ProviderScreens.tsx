@@ -1,9 +1,9 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { ArrowRight, BadgeCheck, CalendarDays, CircleCheck, MapPin, ShieldCheck, Star, UploadCloud, Wallet } from 'lucide-react'
+import { ArrowRight, BadgeCheck, CalendarDays, CircleCheck, LogOut, MapPin, ShieldCheck, Star, UploadCloud, Wallet } from 'lucide-react'
 import { BottomNav, PrimaryButton, ScreenHeader, StatusMessage, formatLkr } from '../../shared/components/MobileUi'
 import { getOwnProvider, saveOwnProvider, uploadProviderDocument } from './provider.service'
 import type { ProviderDocument, ProviderInput, ProviderProfile } from './provider.types'
-import type { AppProfile } from '../auth/AuthProvider'
+import { useAuth, type AppProfile } from '../auth/AuthProvider'
 
 const categoryOptions = ['Electrical', 'Plumbing', 'AC Repair', 'Carpentry', 'Painting', 'Cleaning']
 
@@ -43,13 +43,16 @@ export function ProviderDashboardScreen({ profile, onNavigate }: { profile: AppP
 export function ProviderRegistrationScreen({ profile, onBack, onNavigate }: {
   profile: AppProfile; onBack: () => void; onNavigate: (screen: string) => void
 }) {
+  const { signOut } = useAuth()
   const [existing, setExisting] = useState<ProviderProfile | null>(null)
   const [form, setForm] = useState<ProviderInput>({ display_name: profile.full_name, category: 'Electrical', location: 'Colombo', bio: '', years_experience: 0, base_price_lkr: 0 })
   const [files, setFiles] = useState<Partial<Record<ProviderDocument['kind'], File>>>({})
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [signingOut, setSigningOut] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [logoutError, setLogoutError] = useState('')
   useEffect(() => { let active = true; void getOwnProvider(profile.id).then(data => { if (!active || !data) return; setExisting(data)
     setForm({ display_name: data.display_name, category: data.category, location: data.location, bio: data.bio,
       years_experience: data.years_experience, base_price_lkr: data.base_price_lkr })
@@ -63,6 +66,12 @@ export function ProviderRegistrationScreen({ profile, onBack, onNavigate }: {
       setExisting(result); setFiles({}); setSuccess('Provider profile saved. The admin team can now review your details.')
     } catch (cause) { setError(errorMessage(cause, 'Unable to save provider profile.')) }
     finally { setSaving(false) }
+  }
+  async function logout() {
+    setLogoutError(''); setSigningOut(true)
+    try { await signOut() }
+    catch (cause) { setLogoutError(errorMessage(cause, 'Unable to log out.')) }
+    finally { setSigningOut(false) }
   }
   return <div className="m1-page"><ScreenHeader title="Provider Registration" onBack={onBack}/><main className="m1-scroll">
     <div className="m1-form-intro"><small>REGISTER YOUR SERVICE</small><h1>Become a Service Partner</h1>
@@ -85,5 +94,11 @@ export function ProviderRegistrationScreen({ profile, onBack, onNavigate }: {
       {error && <StatusMessage kind="error">{error}</StatusMessage>}{success && <StatusMessage kind="success">{success}</StatusMessage>}
       <PrimaryButton type="submit" disabled={saving}>{saving ? 'Saving…' : existing ? 'Update Provider Profile' : 'Register as Provider'} <ArrowRight size={16}/></PrimaryButton>
       <p className="m1-form-foot"><CircleCheck size={15}/> Your profile is visible in search only after admin approval.</p>
-    </form>}</main><BottomNav kind="provider" current="provider-register" onNavigate={onNavigate}/></div>
+    </form>}
+    <div className="m1-provider-logout">
+      {logoutError && <StatusMessage kind="error">{logoutError}</StatusMessage>}
+      <button type="button" className="m1-secondary-btn" onClick={() => void logout()} disabled={saving || signingOut}>
+        <LogOut size={16}/> {signingOut ? 'Logging out…' : 'Log Out'}
+      </button>
+    </div></main><BottomNav kind="provider" current="provider-register" onNavigate={onNavigate}/></div>
 }
