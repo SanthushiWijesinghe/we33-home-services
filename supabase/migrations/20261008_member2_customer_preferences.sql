@@ -30,6 +30,10 @@ create table if not exists public.customer_feedback (
   created_at timestamptz not null default now()
 );
 
+-- The older Member 2 migration may already have created this table without updated_at.
+alter table public.customer_addresses
+  add column if not exists updated_at timestamptz not null default now();
+
 create index if not exists customer_addresses_user_idx on public.customer_addresses(user_id);
 create index if not exists customer_payment_methods_user_idx on public.customer_payment_methods(user_id);
 create index if not exists customer_feedback_user_idx on public.customer_feedback(user_id, created_at desc);
@@ -52,10 +56,16 @@ drop policy if exists customer_addresses_owner on public.customer_addresses;
 create policy customer_addresses_owner on public.customer_addresses for all to authenticated using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
 drop policy if exists customer_payment_methods_owner on public.customer_payment_methods;
 create policy customer_payment_methods_owner on public.customer_payment_methods for all to authenticated using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
+drop policy if exists customer_feedback_read on public.customer_feedback;
+drop policy if exists customer_feedback_insert on public.customer_feedback;
 drop policy if exists customer_feedback_owner_read on public.customer_feedback;
-create policy customer_feedback_owner_read on public.customer_feedback for select to authenticated using (user_id = (select auth.uid()));
 drop policy if exists customer_feedback_owner_insert on public.customer_feedback;
-create policy customer_feedback_owner_insert on public.customer_feedback for insert to authenticated with check (user_id = (select auth.uid()));
 drop policy if exists customer_feedback_admin_read on public.customer_feedback;
-create policy customer_feedback_admin_read on public.customer_feedback for select to authenticated using (user_id = (select auth.uid()) or (select public.is_admin()));
+create policy customer_feedback_read on public.customer_feedback for select to authenticated
+  using (user_id = (select auth.uid()) or (select public.is_admin()));
+create policy customer_feedback_insert on public.customer_feedback for insert to authenticated
+  with check (user_id = (select auth.uid()));
+
+-- Make newly created tables available to the Supabase REST API immediately.
+notify pgrst, 'reload schema';
 

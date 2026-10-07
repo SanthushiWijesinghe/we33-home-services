@@ -1,5 +1,5 @@
 /* Member 2 customer preferences, filters, payments and feedback. */
-.member2-screen { gap: 14px; }
+.member2-screen { display: flex; flex-direction: column; gap: 14px; }
 .member2-card { background: #fff; border: 1px solid #f0e4dc; border-radius: 16px; padding: 16px; box-shadow: 0 4px 12px rgba(43, 31, 24, .04); }
 .member2-card h1, .member2-card h2 { margin: 0 0 8px; }
 .member2-card p { color: #766c66; line-height: 1.5; }
