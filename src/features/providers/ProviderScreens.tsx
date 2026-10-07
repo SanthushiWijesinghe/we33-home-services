@@ -33,7 +33,7 @@ export function ProviderDashboardScreen({ profile, onNavigate }: { profile: AppP
             <div><Wallet size={18}/><small>Direct Earnings</small><strong>—</strong></div>
             <div><Star size={18}/><small>Your Rating</small><strong>{provider.rating_count ? provider.rating_avg.toFixed(1) : 'New'}</strong></div></div>
           <div className="m1-section-title"><h2>Direct Bookings</h2><small>Today</small></div>
-          <StatusMessage>Bookings will appear here when the booking module is connected.</StatusMessage>
+          <StatusMessage>New bookings appear in Notifications. Booking status and history are managed in the Member 4 flow.</StatusMessage>
           <div className="m1-section-title"><h2>Service Profile</h2></div>
           <div className="m1-simple-card"><strong>{provider.category}</strong><span><MapPin size={14}/> {provider.location}</span>
             <span>Starting from {formatLkr(provider.base_price_lkr)}</span><button onClick={() => onNavigate('provider-register')}>Edit details <ArrowRight size={15}/></button></div>

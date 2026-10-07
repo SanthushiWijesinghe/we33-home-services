@@ -5,7 +5,7 @@ Installable Android home services app for the WE_33 HCI assignment. The active m
 ## Current status
 
 - React/Vite + Capacitor Android project and Express/TypeScript API are in this repository.
-- Member 1 frontend and server code compiles. Supabase Auth and PostgreSQL are the selected backend.
+- Mobile frontend and Express API compile with the Member 3 implementation. Supabase Auth and PostgreSQL are the backend.
 - The Member 1, 2 and 3 SQL migrations are in `supabase/migrations/`. Apply them in order to the target Supabase project before using the corresponding live screens.
 - The uploaded composite screenshots guide the current layout. Exact visual matching still needs the promised Figma file or full-resolution assets. Google OAuth and Member 4's booking follow-through remain separate work.
 - No fake personal contribution commits or usability results are claimed.
