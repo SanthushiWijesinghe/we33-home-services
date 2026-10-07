@@ -1,4 +1,4 @@
 # notifications module
 
-Owner: M3 proposed. Stage 2 boundary only. Add model, validation, service, controller and routes as needed in the owning feature branch.
+Member 3 implementation: `member3.notifications.routes.ts` exposes the recipient inbox and a recipient-scoped mark-read operation.
 

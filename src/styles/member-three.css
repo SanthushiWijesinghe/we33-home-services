@@ -1,0 +1,66 @@
+/* Member 3: categories, service catalog, availability, booking and notifications. */
+.member3-screen { display:flex; flex-direction:column; gap:14px; padding-top:20px; background:#fdfbf9; }
+.member3-intro { padding:0 2px 4px; }
+.member3-intro>span { color:var(--m1-orange); font-size:10px; font-weight:800; letter-spacing:1.4px; }
+.member3-intro h1 { margin:6px 0 5px; font:800 24px/1.16 Manrope,Arial,sans-serif; letter-spacing:-.6px; }
+.member3-intro p { margin:0; color:#81776e; font-size:12px; line-height:1.5; }
+.member3-card { display:grid; gap:10px; padding:16px; border:1px solid #f0e3d9; border-radius:16px; background:#fff; box-shadow:0 5px 18px #3b26100a; }
+.member3-card h2 { margin:0 0 3px; font-size:16px; }
+.member3-card p { margin:0; color:#756c65; font-size:12px; line-height:1.5; white-space:pre-wrap; }
+.member3-card>small { color:#b5521f; font-weight:800; }
+.member3-form { display:grid; gap:12px; }
+.member3-form label { display:grid; gap:6px; color:#51473f; font-size:12px; font-weight:750; }
+.member3-form input:not([type=checkbox]),.member3-form select,.member3-form textarea { width:100%; box-sizing:border-box; padding:11px; border:1px solid #e9ddd4; border-radius:9px; background:#fff; color:#342c27; font:inherit; font-size:13px; }
+.member3-form input:focus,.member3-form select:focus,.member3-form textarea:focus { outline:2px solid #f8c7a7; outline-offset:1px; }
+.member3-form-grid { display:grid; grid-template-columns:1fr 1fr; gap:9px; }
+.member3-form .member3-check { display:flex; align-items:center; gap:8px; }
+.member3-check input { accent-color:var(--m1-orange); }
+.member3-actions { display:grid; gap:8px; }
+.member3-outline { min-height:40px; padding:8px 12px; border:1px solid #efc8b0; border-radius:9px; background:#fff; color:var(--m1-orange); font:inherit; font-size:12px; font-weight:800; }
+.member3-section-title { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:5px; }
+.member3-section-title h2 { margin:0; font-size:17px; }
+.member3-section-title small { color:#8d8279; font-size:11px; }
+.member3-category-row,.member3-service-button,.member3-notification { width:100%; display:flex; align-items:center; gap:11px; padding:13px; border:1px solid #f0e4da; border-radius:13px; background:#fff; color:#39302b; text-align:left; }
+.member3-service-button { align-items:flex-start; }
+.member3-category-icon { width:38px; height:38px; flex:none; display:grid; place-items:center; border-radius:11px; background:#fff0e5; color:#d95419; }
+.member3-row-text { min-width:0; flex:1; display:grid; gap:4px; }
+.member3-row-text strong { font-size:13px; }
+.member3-row-text small { color:#887c73; font-size:11px; line-height:1.4; overflow-wrap:anywhere; }
+.member3-row-text em { color:#bd4b16; font-size:11px; font-style:normal; font-weight:800; }
+.member3-category-row>button { border:0; background:none; color:#c25b23; }
+.member3-inline-actions { display:flex; gap:7px; align-items:center; }
+.member3-inline-actions button { display:inline-flex; align-items:center; gap:5px; padding:7px; border:1px solid #f0ded3; border-radius:8px; background:#fffaf6; color:#b94e19; font-size:11px; font-weight:700; }
+.member3-card-top { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.member3-card-top strong { font-size:14px; }
+.member3-pill { padding:5px 8px; border-radius:99px; background:#eaf7ee; color:#2e7b51; font-size:10px; font-weight:800; }
+.member3-pill--muted { background:#f4f1ee; color:#827970; }
+.member3-card-actions { padding-top:7px; border-top:1px solid #f1e8e0; }
+.member3-day-group { display:grid; gap:8px; }
+.member3-day-group h3 { display:flex; align-items:center; gap:7px; margin:4px 0 0; color:#5c4c42; font-size:12px; }
+.member3-slot-row { display:flex; align-items:center; gap:8px; padding:10px; border:1px solid #eee2d8; border-radius:11px; background:#fff; }
+.member3-slot-time { display:grid; justify-items:center; gap:3px; min-width:73px; color:#b6511e; font-size:10px; font-weight:800; }
+.member3-slot-time svg { width:15px; }
+.member3-helper { margin:0; color:#897d72; font-size:11px; line-height:1.5; }
+.member3-price { display:flex; align-items:center; justify-content:space-between; padding:16px; border-radius:13px; background:#fff1e6; color:#79513d; font-size:12px; }
+.member3-price strong { color:#b7460d; font-size:18px; }
+.member3-time-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+.member3-time-grid button { display:flex; align-items:center; gap:6px; min-height:48px; padding:9px; border:1px solid #ead8cb; border-radius:10px; background:#fff; color:#52443b; text-align:left; font-size:10px; }
+.member3-time-grid button.selected { border-color:#da5a1b; background:#fff0e5; color:#ae410e; font-weight:800; }
+.member3-confirmed { display:grid; justify-items:center; gap:14px; padding-top:25px; text-align:center; }
+.member3-confirmed-icon { width:62px; height:62px; display:grid; place-items:center; border-radius:50%; background:#e5f7eb; color:#247648; }
+.member3-confirmed h1 { margin:0; font-size:22px; }
+.member3-confirmed>p { margin:0; color:#7c726a; font-size:12px; }
+.member3-confirmed>.member3-card { width:100%; box-sizing:border-box; justify-items:start; text-align:left; }
+.member3-confirmed>.member3-card span { color:#71665e; font-size:12px; }
+.member3-confirmed>.m1-primary-btn,.member3-confirmed>.member3-outline { width:100%; }
+.member3-notification { align-items:flex-start; }
+.member3-notification.unread { border-color:#f1c5ab; background:#fffaf5; }
+.member3-unread-dot { width:8px; height:8px; flex:none; margin-top:5px; border-radius:50%; background:#e85a15; }
+.member3-empty { display:grid; justify-items:center; gap:8px; padding:35px 20px; border:1px dashed #e9d6c8; border-radius:15px; color:#b8501d; background:#fff; text-align:center; }
+.member3-empty h2 { margin:0; color:#312a25; font-size:16px; }
+.member3-empty p { margin:0; color:#887d74; font-size:12px; }
+.member3-provider-actions { display:grid; gap:9px; margin:15px 0; }
+.member3-provider-actions button { width:100%; display:grid; grid-template-columns:1fr 20px; gap:4px; align-items:center; padding:13px; border:1px solid #efdcd0; border-radius:11px; background:#fffaf6; color:#42382e; text-align:left; }
+.member3-provider-actions strong { font-size:12px; }
+.member3-provider-actions small { grid-column:1; color:#8a786d; font-size:10px; }
+.member3-provider-actions svg { grid-column:2; grid-row:1 / 3; color:#c85117; }

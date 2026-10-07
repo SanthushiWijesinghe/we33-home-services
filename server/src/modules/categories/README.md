@@ -1,4 +1,4 @@
 # categories module
 
-Owner: M3 proposed with admin coordination. Stage 2 boundary only. Add model, validation, service, controller and routes as needed in the owning feature branch.
+Member 3 implementation: `member3.categories.routes.ts` exposes public category reads and admin-only maintenance. Supabase RLS enforces the same roles.
 

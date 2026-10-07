@@ -1,4 +1,4 @@
 # services feature
 
-Owner: M3 proposed | categories and service details. Stage 2 boundary only; implement the feature in its own branch after the API contract is reviewed.
+The active Member 3 category and service screens are grouped in `src/features/member3/Member3Screens.tsx` so the contribution boundary is clear.
 

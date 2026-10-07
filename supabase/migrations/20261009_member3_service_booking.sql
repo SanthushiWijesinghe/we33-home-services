@@ -50,6 +50,38 @@ create table if not exists public.availability_slots (
     where (status in ('available', 'booked'))
 );
 
+-- Keep saved appointment times bookable when a provider edits the service.
+create or replace function public.member3_guard_service_duration()
+returns trigger language plpgsql set search_path = '' as $$
+begin
+  if new.duration_minutes <> old.duration_minutes and exists (
+    select 1 from public.availability_slots
+    where service_id = old.id and start_at > now()
+  ) then
+    raise exception 'Remove future availability before changing service duration' using errcode = '22023';
+  end if;
+  return new;
+end;
+$$;
+drop trigger if exists member3_guard_service_duration on public.services;
+create trigger member3_guard_service_duration before update on public.services
+for each row execute function public.member3_guard_service_duration();
+
+create or replace function public.member3_validate_slot_duration()
+returns trigger language plpgsql set search_path = '' as $$
+declare expected_minutes integer;
+begin
+  select duration_minutes into expected_minutes from public.services where id = new.service_id;
+  if expected_minutes is null or extract(epoch from (new.end_at - new.start_at)) <> expected_minutes * 60 then
+    raise exception 'Slot must match service duration' using errcode = '22023';
+  end if;
+  return new;
+end;
+$$;
+drop trigger if exists member3_validate_slot_duration on public.availability_slots;
+create trigger member3_validate_slot_duration before insert or update on public.availability_slots
+for each row execute function public.member3_validate_slot_duration();
+
 create table if not exists public.bookings (
   id uuid primary key default gen_random_uuid(),
   customer_id uuid not null references public.profiles(id),
@@ -130,7 +162,6 @@ grant insert (provider_id, service_id, start_at, end_at) on public.availability_
 grant update (start_at, end_at) on public.availability_slots to authenticated;
 grant delete on public.availability_slots to authenticated;
 grant select on public.bookings, public.notifications to authenticated;
-grant update (read_at) on public.notifications to authenticated;
 
 drop policy if exists member3_categories_read on public.service_categories;
 create policy member3_categories_read on public.service_categories for select to anon, authenticated
@@ -148,6 +179,8 @@ using ((select public.is_admin()));
 drop policy if exists member3_services_read on public.services;
 create policy member3_services_read on public.services for select to anon, authenticated
 using ((is_active and exists (
+  select 1 from public.service_categories c where c.id = category_id and c.is_active
+)) and exists (
   select 1 from public.provider_profiles pp where pp.user_id = provider_id and pp.verification_status = 'approved'
 )) or provider_id = (select auth.uid()) or (select public.is_admin()));
 drop policy if exists member3_services_insert on public.services;
@@ -183,9 +216,6 @@ using (customer_id = (select auth.uid()) or provider_id = (select auth.uid()) or
 drop policy if exists member3_notifications_owner_read on public.notifications;
 create policy member3_notifications_owner_read on public.notifications for select to authenticated
 using (recipient_id = (select auth.uid()));
-drop policy if exists member3_notifications_owner_update on public.notifications;
-create policy member3_notifications_owner_update on public.notifications for update to authenticated
-using (recipient_id = (select auth.uid())) with check (recipient_id = (select auth.uid()));
 
 -- One database transaction locks the slot, checks eligibility, reserves it and creates the booking.
 -- No direct client INSERT privilege exists on bookings or notifications.
@@ -214,6 +244,8 @@ begin
       or v_service.provider_id <> v_slot.provider_id or not exists (
         select 1 from public.provider_profiles pp
         where pp.user_id = v_service.provider_id and pp.verification_status = 'approved'
+      ) or not exists (
+        select 1 from public.service_categories c where c.id = v_service.category_id and c.is_active
       ) then
     raise exception 'Service is unavailable' using errcode = '22023';
   end if;
@@ -238,5 +270,16 @@ end;
 $$;
 revoke all on function public.book_service_slot(uuid, uuid, text) from public;
 grant execute on function public.book_service_slot(uuid, uuid, text) to authenticated;
+
+create or replace function public.mark_member3_notification_read(p_notification_id uuid)
+returns void language plpgsql security definer set search_path = '' as $$
+begin
+  update public.notifications set read_at = coalesce(read_at, now())
+  where id = p_notification_id and recipient_id = auth.uid();
+  if not found then raise exception 'Notification not found' using errcode = 'P0002'; end if;
+end;
+$$;
+revoke all on function public.mark_member3_notification_read(uuid) from public;
+grant execute on function public.mark_member3_notification_read(uuid) to authenticated;
 
 notify pgrst, 'reload schema';

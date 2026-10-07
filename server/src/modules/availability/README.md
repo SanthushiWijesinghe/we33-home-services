@@ -1,4 +1,4 @@
 # availability module
 
-Owner: M3 proposed. Stage 2 boundary only. Add model, validation, service, controller and routes as needed in the owning feature branch.
+Member 3 implementation: `member3.availability.routes.ts` exposes customer slot reads and provider slot CRUD. PostgreSQL prevents overlapping provider times.
 

@@ -31,14 +31,14 @@ Email confirmation returns to `lk.we33.homeservices://auth/callback` on Android 
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | GET/PATCH | `/api/users/me` | Profile and saved locations | C/P/A self | profile fields → profile | FR2 | M2 | Planned |
 | GET | `/api/providers` filtering extension | Price, rating and distance filters | Public | filters → list | FR3 | M2 with M1 | Planned |
-| GET/POST/PATCH/DELETE | `/api/categories` | Service categories | Public read / A write | category fields → category | FR6 | M3 with M1 | Planned |
-| GET/POST/PATCH/DELETE | `/api/services` | Service details and provider services | Public read / P owner write | fields → service | FR6 | M3 | Planned |
-| GET/POST/PATCH/DELETE | `/api/availability` | Available slots and calendar | Public read / P owner write | date and slot → slot | FR5 | M3 | Planned |
-| POST | `/api/bookings` | Reserve slot and create booking | C | service/slot/address/payment choice → booking | FR5 | M3 | Planned |
+| GET/POST/PATCH/DELETE | `/api/categories` | Service categories; admin list at `/manage` | Public read / A write | category fields → category | FR6 | M3 with M1 | Implemented; SQL required |
+| GET/POST/PATCH/DELETE | `/api/services` | Service details and provider services; own list at `/mine` | Public read / P owner write | fields → service | FR6 | M3 | Implemented; SQL required |
+| GET/POST/PATCH/DELETE | `/api/availability` | Available slots and calendar; own list at `/mine` | Public read / P owner write | date and slot → slot | FR5 | M3 | Implemented; SQL required |
+| POST | `/api/bookings` | Atomically reserve a slot and create booking | C | service, slot, address → booking | FR5 | M3 | Implemented; SQL required |
 | GET/PATCH | `/api/bookings` | List, detail and status transitions | C owner / P assigned / A | booking fields → booking | FR7/9 | M4 | Planned |
 | GET/POST/PATCH/DELETE | `/api/reviews` | Read and manage eligible reviews | Public read / C owner write | review → review | FR8 | M4 write, M2 browse | Planned |
 | GET/POST/PATCH | `/api/feedback` | Submit and process feedback | C/P submit / A process | feedback → feedback | Feedback | M2, M1 admin | Planned |
 | GET/POST/PATCH | `/api/support` | Support requests | C/P owner / A | request → status | Support | M4, M1 admin | Planned |
-| GET/PATCH | `/api/notifications` | Inbox and read state | Recipient | filter → notification | FR10 | M3 proposed | Planned |
+| GET/PATCH | `/api/notifications`, `/:id/read` | Inbox and read state | Recipient | list → notifications; mark one read | FR10 | M3 | Implemented; SQL required |
 
 Never send card numbers or CVV to these endpoints. Booking creation must use a transaction or equivalent conflict-safe database operation; a client-only slot check is insufficient.

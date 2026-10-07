@@ -1,4 +1,4 @@
 # notifications feature
 
-Owner: M3 proposed | notification inbox. Stage 2 boundary only; implement the feature in its own branch after the API contract is reviewed.
+The active Member 3 inbox and mark-read interaction are in `src/features/member3/Member3Screens.tsx`.
 

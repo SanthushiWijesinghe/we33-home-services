@@ -15,7 +15,7 @@ export function AdminDashboardScreen({ profile, onNavigate }: { profile: AppProf
     .catch(cause => { if (active) setError(cause.message) }).finally(() => { if (active) setLoading(false) }); return () => { active = false } }, [])
   const pending = providers.filter(item => item.verification_status === 'pending')
   const approved = providers.filter(item => item.verification_status === 'approved')
-  return <div className="m1-page"><ScreenHeader title="Dashboard" action={<Bell size={18}/>}/><main className="m1-scroll">
+  return <div className="m1-page"><ScreenHeader title="Dashboard" action={<button className="m1-icon-btn" onClick={() => onNavigate('notifications')} aria-label="Notifications"><Bell size={18}/></button>}/><main className="m1-scroll">
     <div className="m1-admin-intro"><small>LIVE OVERVIEW</small><h1>Good morning, Admin <span>👋</span></h1><p>{profile.full_name} · Keep HomeService safe and reliable.</p></div>
     {loading ? <StatusMessage>Loading dashboard…</StatusMessage> : error ? <StatusMessage kind="error">{error}</StatusMessage> : <>
       <div className="m1-admin-stats"><div><strong>{pending.length}</strong><small>Pending<br/>Approvals</small></div>
@@ -28,6 +28,7 @@ export function AdminDashboardScreen({ profile, onNavigate }: { profile: AppProf
       {approved.length ? <div className="m1-provider-list">{approved.slice(0, 3).map(provider => <div className="m1-admin-provider-row" key={provider.user_id}>
         <span className="m1-mini-avatar">{(provider.display_name || '').slice(0, 1)}</span><span><strong>{provider.display_name}</strong><small>{provider.category} · {provider.location}</small></span><BadgeCheck size={18}/></div>)}</div>
         : <StatusMessage>No providers have been approved yet.</StatusMessage>}
+      <div className="member3-provider-actions"><button onClick={() => onNavigate('member3-categories')}><strong>Manage service categories</strong><small>Add, edit or hide customer categories</small><ArrowRight size={17}/></button></div>
       <div className="m1-assurance"><ShieldCheck size={19}/><span><strong>Safety comes first</strong><small>Review each document before approval.</small></span></div>
     </>}</main><BottomNav kind="admin" current="admin" onNavigate={onNavigate}/></div>
 }

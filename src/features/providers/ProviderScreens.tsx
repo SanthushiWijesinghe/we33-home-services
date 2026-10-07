@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { ArrowRight, BadgeCheck, CalendarDays, CircleCheck, LogOut, MapPin, ShieldCheck, Star, UploadCloud, Wallet } from 'lucide-react'
+import { ArrowRight, BadgeCheck, Bell, CalendarDays, CircleCheck, LogOut, MapPin, ShieldCheck, Star, UploadCloud, Wallet } from 'lucide-react'
 import { BottomNav, PrimaryButton, ScreenHeader, StatusMessage, formatLkr } from '../../shared/components/MobileUi'
 import { getOwnProvider, saveOwnProvider, uploadProviderDocument } from './provider.service'
 import type { ProviderDocument, ProviderInput, ProviderProfile } from './provider.types'
@@ -20,7 +20,7 @@ export function ProviderDashboardScreen({ profile, onNavigate }: { profile: AppP
   const [error, setError] = useState('')
   useEffect(() => { let active = true; void getOwnProvider(profile.id).then(data => { if (active) setProvider(data) })
     .catch(cause => { if (active) setError(cause.message) }).finally(() => { if (active) setLoading(false) }); return () => { active = false } }, [profile.id])
-  return <div className="m1-page"><ScreenHeader title="Provider Dashboard" action={<button className="m1-mini-avatar" onClick={() => onNavigate('provider-register')} aria-label="Account">{(profile.full_name || '').slice(0, 1)}</button>}/>
+  return <div className="m1-page"><ScreenHeader title="Provider Dashboard" action={<button className="m1-icon-btn" onClick={() => onNavigate('notifications')} aria-label="Notifications"><Bell size={18}/></button>}/>
     <main className="m1-scroll"><div className="m1-provider-welcome"><span className="m1-large-avatar">{(profile.full_name || '').slice(0, 1).toUpperCase()}</span>
       <div><strong>Hello {(profile.full_name || '').split(' ')[0]} 👋</strong><small>{provider?.verification_status === 'approved' ? 'Verified Partner' : 'Service Partner'}</small></div>
       <span className="m1-rating-pill"><Star size={13} fill="currentColor"/> {provider?.rating_count ? provider.rating_avg.toFixed(1) : 'New'}</span></div>
@@ -36,7 +36,9 @@ export function ProviderDashboardScreen({ profile, onNavigate }: { profile: AppP
           <StatusMessage>Bookings will appear here when the booking module is connected.</StatusMessage>
           <div className="m1-section-title"><h2>Service Profile</h2></div>
           <div className="m1-simple-card"><strong>{provider.category}</strong><span><MapPin size={14}/> {provider.location}</span>
-            <span>Starting from {formatLkr(provider.base_price_lkr)}</span><button onClick={() => onNavigate('provider-register')}>Edit details <ArrowRight size={15}/></button></div></>}
+            <span>Starting from {formatLkr(provider.base_price_lkr)}</span><button onClick={() => onNavigate('provider-register')}>Edit details <ArrowRight size={15}/></button></div>
+          <div className="member3-provider-actions"><button onClick={() => onNavigate('member3-services')}><strong>My services</strong><small>Add services, prices and durations</small><ArrowRight size={17}/></button>
+            <button onClick={() => onNavigate('member3-availability')}><strong>Availability calendar</strong><small>Add and edit open appointment times</small><CalendarDays size={17}/></button></div></>}
     </main><BottomNav kind="provider" current="provider" onNavigate={onNavigate}/></div>
 }
 

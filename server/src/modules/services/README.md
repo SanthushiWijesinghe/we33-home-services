@@ -1,4 +1,4 @@
 # services module
 
-Owner: M3 proposed. Stage 2 boundary only. Add model, validation, service, controller and routes as needed in the owning feature branch.
+Member 3 implementation: `member3.services.routes.ts` exposes public active service reads and provider-owned CRUD. RLS checks provider approval and approved trade.
 

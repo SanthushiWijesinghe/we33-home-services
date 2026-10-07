@@ -1,13 +1,13 @@
 # HomeService — WE_33
 
-Installable Android home services app for the WE_33 HCI assignment. The active mobile entry implements **Member 1** screens first: splash, onboarding, role selection, email login/signup, customer Home and provider search, provider registration/dashboard, and admin dashboard/verification. The other members' domain folders remain reserved for their own implementation. The legacy Stage 2 demo remains in `src/app/App.jsx` for reference.
+Installable Android home services app for the WE_33 HCI assignment. The active mobile entry includes Member 1 account/provider/admin flows, Member 2 customer preferences, and Member 3 service, availability, booking creation and notification flows. The legacy Stage 2 demo remains in `src/app/App.jsx` for reference.
 
 ## Current status
 
 - React/Vite + Capacitor Android project and Express/TypeScript API are in this repository.
 - Member 1 frontend and server code compiles. Supabase Auth and PostgreSQL are the selected backend.
-- The SQL migration is **written but not yet applied** to the user's Supabase project. Live accounts, search results and admin decisions require that migration.
-- The uploaded composite screenshots guide the current layout. Exact visual matching still needs the promised Figma file or full-resolution assets. Google OAuth and Member 2–4 business flows are not implemented.
+- The Member 1, 2 and 3 SQL migrations are in `supabase/migrations/`. Apply them in order to the target Supabase project before using the corresponding live screens.
+- The uploaded composite screenshots guide the current layout. Exact visual matching still needs the promised Figma file or full-resolution assets. Google OAuth and Member 4's booking follow-through remain separate work.
 - No fake personal contribution commits or usability results are claimed.
 
 ## Architecture
@@ -19,10 +19,12 @@ src/features/home/            customer home
 src/features/discovery/       provider search (Member 2 owns advanced filters)
 src/features/providers/       provider detail, registration, dashboard, data access
 src/features/admin/           admin dashboard and verification
+src/features/member2/         customer preferences and feedback
+src/features/member3/         categories, services, availability, booking creation, inbox
 src/shared/                   shared UI and types
 src/services/supabase/        client using publishable key
 server/src/modules/           Express REST routes; Member 1 auth/providers/admin implemented
-supabase/migrations/          SQL schema, RLS, private document bucket, verification RPC
+supabase/migrations/          SQL schema, RLS and member-specific RPCs
 android/                      Capacitor Android project
 docs/                        requirements, architecture, API, traceability, ownership
 ```
@@ -47,7 +49,7 @@ Node.js 22+, npm, Android Studio with SDK Platform 35+, and a Supabase project. 
 
 5. Providers sign up with the provider role, complete **Provider Registration**, and upload both ID sides. Admin approval requires both documents. Only approved providers appear in customer search.
 
-The migration has not been run by this repository. An empty or unmigrated project will show empty/error states rather than fabricated provider data.
+Apply the Member 2 and Member 3 migrations after Member 1 to enable their tables. The repository cannot apply remote SQL just by building the app. An unmigrated project will show an error state rather than fabricated data.
 
 ### Email confirmation callbacks
 
@@ -96,8 +98,8 @@ Supabase uses its remote HTTPS URL on desktop, emulator and phone. If future fea
 
 ## Member ownership and Git
 
-Member 1 owns auth, Home, provider search, provider dashboard, admin dashboard and verification. Member 2 owns advanced filters, profile, location, payment display, reviews browsing and feedback. Member 3's categories, availability, booking creation and notifications allocation needs team confirmation. Member 4 owns booking management, status, review submission and support. See individual files in `docs/05-members/` and [CONTRIBUTING.md](CONTRIBUTING.md). Each member should personally implement, commit, push and explain their assigned changes.
+Member 1 owns auth, Home, provider search, provider dashboard, admin dashboard and verification. Member 2 owns advanced filters, profile, location, payment display, reviews browsing and feedback. Member 3's proposed categories, availability, booking creation and notifications scope is implemented in the `kosala` checkout; original-report allocation and personal attribution still need team confirmation. Member 4 owns booking management, status, review submission and support. See individual files in `docs/05-members/` and [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Known limitations
 
-The Member 1 screens are based on low-resolution composite screenshots; a pixel-exact asset/spacing pass awaits the Figma source. Home search is backed by approved `provider_profiles`; service-specific catalog, availability, bookings, payments, detailed filters and notifications belong to later member integrations. The Android launcher and native splash use a HomeService vector mark; their final visual treatment also awaits the Figma source. No live database migration, Google OAuth setup, usability session or end-to-end booking result is claimed.
+The Member 1 screens are based on low-resolution composite screenshots; a pixel-exact asset/spacing pass awaits the Figma source. Home search is backed by approved `provider_profiles`; Member 3's service catalog, availability, booking creation and notifications require its remote SQL migration. Member 4's booking management and status flow is not complete. The Android launcher and native splash use a HomeService vector mark; their final visual treatment also awaits the Figma source. No live Member 3 booking result, Google OAuth setup or usability session is claimed here.

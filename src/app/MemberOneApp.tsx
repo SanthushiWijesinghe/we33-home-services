@@ -14,9 +14,12 @@ import { BottomNav, ScreenHeader, StatusMessage } from '../shared/components/Mob
 import { Member2FeedbackHistoryScreen, Member2FeedbackScreen, Member2LocationScreen, Member2PaymentScreen, Member2ProfileScreen, Member2ReviewsScreen, Member2ServiceFiltersScreen } from '../features/member2/Member2Screens'
 import { listApprovedProviders } from '../features/providers/provider.service'
 import type { ProviderProfile } from '../features/providers/provider.types'
+import { Member3AvailabilityScreen, Member3BookingScreen, Member3CategoriesScreen, Member3CustomerServicesScreen, Member3NotificationsScreen, Member3ProviderServicesScreen } from '../features/member3/Member3Screens'
+import type { Member3Service } from '../features/member3/member3.types'
 
 type Screen = 'splash' | 'onboarding' | 'role' | 'login' | 'signup' | 'admin-login' | 'home' | 'search' |
-  'provider-detail' | 'provider' | 'provider-register' | 'admin' | 'verification' | 'bookings' | 'profile' | 'earnings' | 'settings' | 'member2-filters' | 'location' | 'payments' | 'feedback' | 'feedback-history' | 'reviews'
+  'provider-detail' | 'provider' | 'provider-register' | 'admin' | 'verification' | 'bookings' | 'profile' | 'earnings' | 'settings' | 'member2-filters' | 'location' | 'payments' | 'feedback' | 'feedback-history' | 'reviews' |
+  'member3-categories' | 'member3-services' | 'member3-availability' | 'member3-provider-services' | 'member3-booking' | 'notifications'
 
 function MemberOneContent() {
   const auth = useAuth()
@@ -28,6 +31,8 @@ function MemberOneContent() {
   const [catalogError, setCatalogError] = useState<string | null>(null)
   const [searchCategory, setSearchCategory] = useState('All')
   const [selectedProvider, setSelectedProvider] = useState<ProviderProfile | null>(null)
+  const [selectedService, setSelectedService] = useState<Member3Service | null>(null)
+  const [notificationReturn, setNotificationReturn] = useState<Screen>('home')
 
   useEffect(() => { const timer = window.setTimeout(() => setReady(true), 900); return () => window.clearTimeout(timer) }, [])
   useEffect(() => {
@@ -49,10 +54,18 @@ function MemberOneContent() {
     return () => { active = false }
   }, [auth.profile?.id, auth.profile?.role])
 
-  function navigate(target: string) { setScreen(target as Screen); window.scrollTo(0, 0) }
+  function navigate(target: string) {
+    if (target === 'notifications') setNotificationReturn(screen)
+    setScreen(target as Screen); window.scrollTo(0, 0)
+  }
   function openSearch(category = 'All') { setSearchCategory(category); navigate('search') }
   function back() {
     if (screen === 'provider-detail') navigate('search')
+    else if (screen === 'member3-categories') navigate(auth.profile?.role === 'ADMIN' ? 'admin' : 'home')
+    else if (screen === 'member3-services' || screen === 'member3-availability') navigate('provider')
+    else if (screen === 'member3-provider-services') navigate('provider-detail')
+    else if (screen === 'member3-booking') navigate('member3-provider-services')
+    else if (screen === 'notifications') navigate(notificationReturn)
     else if (screen === 'member2-filters') navigate('search')
     else if (screen === 'search' || screen === 'bookings' || screen === 'profile') navigate('home')
     else if (screen === 'location' || screen === 'payments' || screen === 'feedback' || screen === 'feedback-history' || screen === 'reviews') navigate('profile')
@@ -67,6 +80,7 @@ function MemberOneContent() {
   function selectRole(role: 'CUSTOMER' | 'SERVICE_PROVIDER') { setRoleChoice(role); navigate('login') }
   function finishOnboarding() { localStorage.setItem('hs-onboarding-seen', '1'); navigate('role') }
   function selectProvider(provider: ProviderProfile) { setSelectedProvider(provider); navigate('provider-detail') }
+  function selectService(service: Member3Service) { setSelectedService(service); navigate('member3-booking') }
 
   let content
   if (!ready || auth.loading) content = <SplashScreen/>
@@ -84,11 +98,22 @@ function MemberOneContent() {
     providers={providers} loading={catalogLoading} error={catalogError} initialCategory={searchCategory} onProvider={selectProvider} onNavigate={navigate} onFilter={() => navigate('member2-filters')}/>
   else if (screen === 'provider-detail' && auth.profile.role === 'CUSTOMER' && selectedProvider) content = <ProviderDetailScreen
     provider={selectedProvider} onBack={back} onNavigate={navigate}/>
+  else if (screen === 'member3-categories' && (auth.profile.role === 'CUSTOMER' || auth.profile.role === 'ADMIN')) content = <Member3CategoriesScreen
+    isAdmin={auth.profile.role === 'ADMIN'} onBack={back} onCategory={openSearch} onNavigate={navigate}/>
+  else if (screen === 'member3-provider-services' && auth.profile.role === 'CUSTOMER' && selectedProvider) content = <Member3CustomerServicesScreen
+    provider={selectedProvider} onBack={back} onService={selectService} onNavigate={navigate}/>
+  else if (screen === 'member3-booking' && auth.profile.role === 'CUSTOMER' && selectedProvider && selectedService) content = <Member3BookingScreen
+    provider={selectedProvider} service={selectedService} onBack={back} onNavigate={navigate}/>
   else if (screen === 'provider' && auth.profile.role === 'SERVICE_PROVIDER') content = <ProviderDashboardScreen profile={auth.profile} onNavigate={navigate}/>
+  else if (screen === 'member3-services' && auth.profile.role === 'SERVICE_PROVIDER') content = <Member3ProviderServicesScreen
+    profile={auth.profile} onBack={back} onNavigate={navigate}/>
+  else if (screen === 'member3-availability' && auth.profile.role === 'SERVICE_PROVIDER') content = <Member3AvailabilityScreen
+    profile={auth.profile} onBack={back} onNavigate={navigate}/>
   else if (screen === 'provider-register' && auth.profile.role === 'SERVICE_PROVIDER') content = <ProviderRegistrationScreen
     profile={auth.profile} onBack={back} onNavigate={navigate}/>
   else if (screen === 'admin' && auth.profile.role === 'ADMIN') content = <AdminDashboardScreen profile={auth.profile} onNavigate={navigate}/>
   else if (screen === 'verification' && auth.profile.role === 'ADMIN') content = <AdminVerificationScreen onNavigate={navigate}/>
+  else if (screen === 'notifications') content = <Member3NotificationsScreen profile={auth.profile} onBack={back} onNavigate={navigate}/>
   else if (screen === 'member2-filters' && auth.profile.role === 'CUSTOMER') content = <Member2ServiceFiltersScreen providers={providers} initialCategory={searchCategory} onProvider={selectProvider} onBack={back} onNavigate={navigate}/>
   else if (screen === 'profile' && auth.profile.role === 'CUSTOMER') content = <Member2ProfileScreen profile={auth.profile} onBack={back} onNavigate={navigate} onProfileUpdated={() => { void auth.refreshProfile() }} onSignOut={() => void auth.signOut()}/>
   else if (screen === 'location' && auth.profile.role === 'CUSTOMER') content = <Member2LocationScreen profile={auth.profile} onBack={back}/>

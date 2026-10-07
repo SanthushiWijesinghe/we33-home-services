@@ -1,5 +1,5 @@
-import { ArrowLeft, BadgeCheck, MapPin, ShieldCheck, Star } from 'lucide-react'
-import { BottomNav, PrimaryButton, ScreenHeader, StatusMessage, formatLkr } from '../../shared/components/MobileUi'
+import { ArrowRight, BadgeCheck, MapPin, ShieldCheck, Star } from 'lucide-react'
+import { BottomNav, PrimaryButton, ScreenHeader, formatLkr } from '../../shared/components/MobileUi'
 import type { ProviderProfile } from './provider.types'
 
 export function ProviderDetailScreen({ provider, onBack, onNavigate }: {
@@ -14,7 +14,6 @@ export function ProviderDetailScreen({ provider, onBack, onNavigate }: {
       <section><h2>About this professional</h2><p>{provider.bio || 'Verified home care professional.'}</p></section>
       <section><h2>Service information</h2><p>Starting from {formatLkr(provider.base_price_lkr)}. Final price is confirmed before booking.</p></section>
       <div className="m1-assurance"><ShieldCheck size={20}/><span><strong>Verified provider</strong><small>Approved by the HomeService admin team.</small></span></div>
-      <StatusMessage>Availability and booking are being connected by the booking feature owner.</StatusMessage>
-      <PrimaryButton onClick={onBack}><ArrowLeft size={16}/> Back to providers</PrimaryButton></div>
+      <PrimaryButton onClick={() => onNavigate('member3-provider-services')}>View services & availability <ArrowRight size={16}/></PrimaryButton></div>
     </main><BottomNav kind="customer" current="search" onNavigate={onNavigate}/></div>
 }

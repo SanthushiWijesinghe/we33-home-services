@@ -1,7 +1,9 @@
-# MEMBER 3 WORKLOAD — TEAM CONFIRMATION REQUIRED
+# Member 3 workload and implementation boundary
 
-The Milestone 02 workload table does **not** clearly assign Member 3 interfaces. The allocation below is **proposed**, not an assertion about the original report. The group must agree and record the final allocation, student name and ID before feature work or viva claims.
+The Milestone 02 workload table did **not** clearly assign Member 3 interfaces. The user requested implementation of the proposed Member 3 scope in the `kosala` checkout. The group should still record the final allocation, actual student name, ID, commits and viva evidence; this document does not claim a student's personal contribution.
 
-Proposed screens: service categories, service details, availability, availability calendar, booking creation flow and notifications. Proposed frontend boundaries: `src/features/services/`, `availability/`, `notifications/`, and booking creation in coordination with Member 4. Proposed backend ownership: `categories/`, `services/`, `availability/`, notification routes; booking creation contract shared with Member 4.
+Implemented screen/code boundaries: `src/features/member3/` and `src/styles/member-three.css`. The Supabase schema/RPC is in `supabase/migrations/20261009_member3_service_booking.sql`. Optional Express routes are in `server/src/modules/{categories,services,availability,bookings,notifications}/member3.*.routes.ts`. The shared app screens only link into Member 3's screens.
 
-Proposed CRUD: category read/admin maintenance; service create/read/update/delete with provider ownership; availability slot create/read/update/delete; booking creation with conflict checks; notification read/mark read. Related IDs: FR5, FR6, FR10. Expected cases: service details/pricing, availability slot conflicts, booking creation, notification read state, role denial. Viva: proposed module boundaries, date/time and concurrency rules, and actual test outcomes.
+Member 3 implements service categories and service CRUD, provider availability/calendar CRUD, atomic booking creation, and notification read state. Member 4 retains booking status/history and post-booking interactions. Live results require applying the migration to Supabase.
+
+Related IDs: FR5, FR6, FR10. Viva walkthrough: provider approval → service → slot → customer booking → both inboxes. Explain RLS, the slot exclusion constraint, row lock in `book_service_slot`, and which work is still assigned to Member 4. Record actual test outcomes only after running the live flow.
