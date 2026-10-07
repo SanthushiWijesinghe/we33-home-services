@@ -4,7 +4,7 @@ The rows below describe **planned ownership**, not completed personal contributi
 
 | Member | Assigned/proposed interfaces | Frontend boundary | Backend boundary | Requirement IDs | Status |
 | --- | --- | --- | --- | --- | --- |
-| 1 | Auth, home, provider/admin dashboards, search, verification | `auth/`, `home/`, `admin/`, search | `auth/`, provider/admin routes | FR1–4, FR6 | Assignment documented; implementation pending |
+| 1 | Auth, home, provider/admin dashboards, search, verification | `auth/`, `home/`, `discovery/`, `providers/`, `admin/` | Supabase migration; `auth/`, `providers/`, `admin/` routes | FR1–4, FR6 | Member 1 code scaffolded; remote migration, visual pass and personal contribution evidence pending |
 | 2 | Filters, profile, location, payment options, review browsing, feedback | `discovery/`, `profile/`, `payments/`, `feedback/`, review browse | users, safe payment metadata, feedback | FR2, FR3, FR8 | Assignment documented; implementation pending |
 | 3 | Categories, details, availability/calendar, booking creation, notifications | `services/`, `availability/`, `notifications/` | categories, services, availability, notifications | FR5, FR6, FR10 | **PROPOSED — team confirmation required** |
 | 4 | Bookings, status/history, review submission, support | `bookings/`, review submit, `support/` | bookings, reviews, support | FR7–9 | Assignment documented; implementation pending |

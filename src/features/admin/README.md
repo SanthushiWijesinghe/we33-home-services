@@ -1,4 +1,4 @@
 # admin feature
 
-Owner: M1 | administration and verification UI. Stage 2 boundary only; implement the feature in its own branch after the API contract is reviewed.
+Owner: M1. `AdminScreens.tsx` renders dashboard and verification queue. The `review_provider` Supabase function enforces admin status and document requirements; the Express mirror is under `server/src/modules/admin/`.
 

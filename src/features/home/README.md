@@ -1,4 +1,4 @@
 # home feature
 
-Owner: M1 | customer home. Stage 2 boundary only; implement the feature in its own branch after the API contract is reviewed.
+Owner: M1. `HomeScreen.tsx` renders customer Home and approved provider cards. Category navigation is present; Member 3 owns the persistent category/service catalog.
 

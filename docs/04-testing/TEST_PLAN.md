@@ -18,3 +18,9 @@ Usability sessions must include at least five real or proxy users and the Milest
 | Android Back | Search returned to Home | [Back result](android-stage2-back.png) emulator capture |
 
 These checks cover the shared foundation and existing demo screens. They do not validate future authenticated or database backed features.
+
+## Member 1 Android build check
+
+The Member 1 frontend and Express server compiled. The Capacitor Android debug APK built and installed on a Pixel 6 API 36 emulator. The native splash, onboarding, role selection, and login screens opened, and the Android status bar icons were legible after the theme update. Captures: [Native splash](member1-native-splash.png), [Onboarding](member1-onboarding.png), [Role selection](member1-role.png), and [Login](member1-login.png).
+
+This visual check does not establish that Supabase registration, provider approval, search, or admin actions work against the remote project. The SQL migration has not yet been applied there, and the Figma source is still needed for an exact visual comparison.

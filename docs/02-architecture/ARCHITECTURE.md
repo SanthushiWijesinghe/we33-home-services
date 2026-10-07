@@ -1,36 +1,45 @@
-# System architecture
+# Mobile application architecture
 
 ```text
-Android app (Capacitor + existing React/Vite UI)
-  → feature screen and hook
-  → shared API client / session state
-  → HTTPS REST API
-  → Express route and auth/role/validation middleware
-  → feature controller
-  → service/business rules
-  → Mongoose model
-  → MongoDB Atlas
+Capacitor Android shell
+  └─ React app entry and navigation
+      ├─ Member 1: auth, home, discovery, provider, admin
+      ├─ Member 2: profile, location, payments display, feedback, filters
+      ├─ Member 3: services, availability, booking creation, notifications (proposed)
+      └─ Member 4: bookings, status, reviews, support
+          ├─ Supabase Auth (session and user identity)
+          ├─ Supabase Data API + RLS (owner-scoped CRUD)
+          └─ Express REST API (multi-step workflows and integration)
+                 └─ Supabase PostgreSQL
 ```
 
-The existing React screens stay under the root `src/` directory. The generated `android/` project packages `dist/` from `npm run build`; run `npx cap sync android` after each web change. `server/` is an independent TypeScript package. No business logic should be added to `src/app/App.jsx` as member features are built. Extract screens and data hooks by feature when an owner begins that work.
+## Repository boundaries
 
-## Shared contracts
+- `src/app/MemberOneApp.tsx`: current mobile entry and role-aware screen orchestration. It uses `AuthProvider`; it does not grant database privileges.
+- `src/features/<domain>/`: screen, component, hook, service and types owned by the feature member. Avoid member-named code folders.
+- `src/shared/`, `src/navigation/`, `src/services/`, `src/theme/`, `src/config/`: shared client infrastructure.
+- `server/src/modules/<domain>/`: Express routes/controllers/services for custom workflows. The Member 1 routes under `auth`, `providers` and `admin` are implemented.
+- `supabase/migrations/`: versioned PostgreSQL schema, grants, RLS policies, storage policies and trusted functions. Member 1's migration must be applied before live screens work.
+- `android/`: generated Capacitor project. Web changes require `npm run android:sync` before an APK rebuild.
 
-- IDs: MongoDB ObjectIds on the server; the current `HS-*` booking references are demo IDs. Preserve a human-readable booking reference separately from the database ID.
-- Roles: `CUSTOMER`, `SERVICE_PROVIDER`, `ADMIN`. Server authorization decides access; visible role navigation never grants authority.
-- Dates: ISO 8601 in API payloads. Store availability instants in UTC and display in the device's local time zone; store addresses separately from provider service areas.
-- Prices: integer LKR minor units in the API. Show estimated total, service fee and payment choice before booking confirmation.
-- Errors: `{ "error": { "code": "...", "message": "...", "details": [] } }`. The shared client turns non-2xx responses into `ApiError`.
-- Request validation and role checks happen before controller/service execution. Controllers translate input/output; services enforce business rules; models persist data.
+## Identity and authorization
 
-## Current boundaries
+1. The app signs up or signs in using Supabase Auth. Public signup metadata permits CUSTOMER or SERVICE_PROVIDER only.
+2. A trusted database trigger creates `public.profiles`. ADMIN is never assigned from public signup.
+3. The app reads its own `profiles` row to route to the correct workspace.
+4. Every data table has explicit grants and RLS. Admin verification uses the `review_provider` database function, which checks `public.is_admin()` inside PostgreSQL.
+5. Express checks the Supabase access token through Auth, reads the current role from `profiles`, and applies role middleware. Client routing is presentation, not authorization.
 
-`src/services/api/client.ts` is the shared HTTP entry point; it is not yet called by existing demo screens. `src/services/storage/demoStore.ts` is a safe browser storage adapter. `src/theme/tokens.ts` holds reusable future UI values while the established design remains in `src/styles/global.css`. `src/navigation/useAndroidBack.ts` handles Android system Back. `server/src/app.ts` provides middleware and health; domain routes are for member stages.
+The Supabase publishable key can be bundled in Android. A database password or Supabase secret key must only live in a trusted server environment and is not required for the current Member 1 mobile flows.
 
-## Environments
+## Data and cross-member contracts
 
-The Vite build embeds `VITE_API_URL`; Android cannot use the computer's `localhost`. Use `10.0.2.2` for an Android emulator reaching the host computer, a LAN IP for a physical phone, or a deployed HTTPS API. Never put JWT secrets in Vite environment variables. The server reads `PORT`, `MONGODB_URI`, `JWT_SECRET`, `JWT_EXPIRES_IN` and `WEB_ORIGIN` from `server/.env`.
+Use UUIDs from Supabase Auth/PostgreSQL for primary keys. Use ISO 8601 timestamps in API payloads, UTC storage for availability, and integer LKR amounts for displayed prices. The current provider profile stores a starting price in LKR; Member 3's Service model can later hold service-specific prices. Bookings must reserve slots transactionally and store price/address snapshots. Member 4 owns booking status and review writes.
 
-## Security and reliability
+Current shared UI states are loading, error and empty. No fake provider data is returned when Supabase is empty. The previous browser demo remains in `src/app/App.jsx` and `src/features/pages/` as reference, but is not the active mobile entry.
 
-Passwords will be hashed with bcrypt before storage. JWT validation and role checks are server middleware. Feature owners must also check record ownership, for example customers only seeing their bookings. Validate all request bodies, handle duplicate booking slots, and avoid storing card numbers or CVV. The existing localStorage demo does not provide these guarantees and must not be used as the shared backend.
+## Environment and release
+
+Root `.env`: `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY`; optional `VITE_API_URL`. Server `.env`: `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `PORT`, `WEB_ORIGIN`. Only the publishable key enters the client. For a local Express API, Android emulator uses `10.0.2.2`; a physical phone uses the computer's reachable LAN address or deployed HTTPS API. Supabase itself is remote and does not use the emulator's `localhost`.
+
+Build gates: TypeScript check, Vite build, server compile, Capacitor sync and Android debug build. A successful compile does not prove the Supabase migration was applied or that every screen matches the source design.

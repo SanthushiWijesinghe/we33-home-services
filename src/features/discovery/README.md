@@ -1,4 +1,4 @@
 # discovery feature
 
-Owner: M1/M2 | provider search and filters. Stage 2 boundary only; implement the feature in its own branch after the API contract is reviewed.
+M1 owns basic provider search and category chips in `SearchProvidersScreen.tsx`. M2 owns advanced filters and customer review browsing. Coordinate query and response types rather than editing each other's screens at once.
 

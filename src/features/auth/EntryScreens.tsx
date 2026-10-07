@@ -28,12 +28,12 @@ export function RoleSelectScreen({ onCustomer, onProvider, onAdmin }: {
   return <div className="m1-entry m1-role-select">
     <div className="m1-role-top"><Brand compact/><button className="m1-small-pill" onClick={onAdmin}>Admin</button></div>
     <h1>How will you use<br/><span>HomeService?</span></h1>
-    <p className="m1-muted">Select your role to personalize your experience. You can easily switch anytime.</p>
+    <p className="m1-muted">Select how you want to use HomeService. Your account role controls access to each workspace.</p>
     <button className="m1-role-card" onClick={onCustomer}><span className="m1-role-icon"><House size={22}/></span>
       <span><strong>I Need Home Services</strong><small>Book verified electricians, plumbers &amp; pros for your home.</small>
       <em>Instant Booking · 100% Guaranteed</em></span><ChevronRight size={18}/></button>
     <button className="m1-role-card" onClick={onProvider}><span className="m1-role-icon m1-role-icon--dark"><BriefcaseBusiness size={22}/></span>
-      <span><strong>Service Provider / Admin</strong><small>Grow your business, accept nearby jobs &amp; manage earnings.</small>
+      <span><strong>Service Provider</strong><small>Grow your business, accept nearby jobs &amp; manage earnings.</small>
       <em>Verified Partners · Fair Daily Payouts</em></span><ChevronRight size={18}/></button>
     <p className="m1-role-foot"><Check size={15}/> Your account role controls access to each workspace.</p>
   </div>

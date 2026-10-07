@@ -80,7 +80,7 @@ returns boolean language sql stable security definer set search_path = '' as $$
   select exists(select 1 from public.profiles where id = (select auth.uid()) and role = 'ADMIN');
 $$;
 revoke all on function public.is_admin() from public;
-grant execute on function public.is_admin() to authenticated;
+grant execute on function public.is_admin() to anon, authenticated;
 
 alter table public.profiles enable row level security;
 alter table public.provider_profiles enable row level security;
@@ -149,6 +149,12 @@ begin
   end if;
   if p_status = 'rejected' and length(trim(coalesce(p_note, ''))) = 0 then
     raise exception 'A rejection reason is required' using errcode = '22023';
+  end if;
+  if p_status = 'approved' and
+    (select count(distinct d.kind) from public.provider_documents d
+     join storage.objects o on o.bucket_id = 'provider-documents' and o.name = d.storage_path
+     where d.provider_id = p_provider_id and d.kind in ('identity_front', 'identity_back')) < 2 then
+    raise exception 'Front and back identity documents are required before approval' using errcode = '22023';
   end if;
   update public.provider_profiles
   set verification_status = p_status, verification_note = nullif(trim(coalesce(p_note, '')), ''),

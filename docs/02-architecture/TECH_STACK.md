@@ -1,19 +1,28 @@
-# Technology stack decision
+# Technology stack decision — Supabase revision
 
-Decision date: 5 October 2026. Stage: common foundation. The [project audit](../PROJECT_AUDIT.md) records the existing implementation and gaps.
+Decision date: 2026-10-07. The project owner chose Supabase after the Stage 2 MongoDB proposal. This revision applies to new work; the Stage 2 audit remains a historical snapshot.
 
-| Layer | Choice | Why it fits WE_33 | Current status |
-| --- | --- | --- | --- |
-| Mobile UI | React 18, Vite 6, JavaScript screens with TypeScript for new shared modules | Preserves the working Milestone 02 inspired UI, keeps member modules independent, and allows gradual type adoption | Existing app builds; feature screens remain JavaScript |
-| Android runtime | Capacitor 7 | Packages the built web assets as an installable Android app, supplies device integration and Back handling, and works with the installed Android Studio 2025.1.2 | Android project generated; debug build verification recorded in README |
-| Backend | Node.js, Express 5, TypeScript | A small REST server with middleware for validation, errors and role checks; JavaScript knowledge transfers from the UI | Foundation and health route only |
-| Database | MongoDB Atlas, Mongoose 8 | Flexible document models for providers, services, bookings and reviews; Mongoose schema/index support | Connection infrastructure only; no credentials or domain models yet |
-| Authentication | JWT, bcrypt password hashes, server-side role checks | Stateless mobile API sessions and explicit access checks for CUSTOMER, SERVICE_PROVIDER and ADMIN | JWT verification middleware skeleton; login/registration and hashing belong to the feature stage |
-| API | JSON REST under `/api` | Clear contracts, HTTP status codes and ownership boundaries | Designed; `/api/health` implemented |
-| Testing | TypeScript compilation, Vite/Gradle builds; later Vitest and Jest/Supertest | Build checks protect the shared foundation; feature owners add behavior tests and manual evidence | No feature tests yet |
+| Layer | Choice | Reason |
+| --- | --- | --- |
+| Android app | Existing React 18, Vite 6 and Capacitor 7 | Reuses the mobile prototype and generated Android project. Capacitor packages the built web assets as an installable Android application. |
+| New frontend modules | TypeScript/TSX and feature folders | Clear contracts for four members without rewriting legacy demo code. |
+| Authentication | Supabase Auth | Handles email/password sessions and token refresh. Public registration can create CUSTOMER or SERVICE_PROVIDER accounts; admin promotion is trusted-only. No separate password database or second JWT system. |
+| Database | Supabase PostgreSQL | Foreign keys and constrained records fit users, provider approvals, services, slots and bookings. SQL migrations provide a reviewable team contract. |
+| Authorization | Supabase Row Level Security plus server role checks | The mobile publishable key is public. RLS enforces row access; Express verifies the access token and rechecks the account role for API routes. |
+| Backend API | Existing Node.js/Express/TypeScript | Keeps custom workflows and stable REST endpoints for booking conflict rules, admin operations and future integrations. Member 1 routes are implemented; other member routes remain planned. |
 
-Reusing React reduces the risk of rebuilding many screens from the embedded high-fidelity screenshots. Capacitor ships a native Android project containing the app's built assets, so a successful Gradle output is an installable APK even though the UI renders in Android WebView. A browser preview alone does not meet the installable deliverable.
+## Why the existing app remains
 
-Limitations: the current UI still uses browser localStorage and a demo role switch. The backend has no member-owned routes yet. A real Atlas connection needs an approved URI and network access. Android WebView performance and native controls differ from React Native, so the group must verify touch targets, safe areas, Back navigation and device usability. A deployed HTTPS API is preferred; local emulator/phone HTTP setup needs explicit development-only network configuration.
+The assignment already has a React UI and an Android wrapper. Rewriting in a different mobile framework would discard working screens, introduce a second component system and increase integration work. The new Member 1 app entry is isolated in `src/app/MemberOneApp.tsx`; the Stage 2 demo remains in `src/app/App.jsx` for reference and later extraction by the assigned owners.
 
-Capacitor 7 is pinned because the installed Android Studio is 2025.1.2; [Capacitor's environment guide](https://capacitorjs.com/docs/getting-started/environment-setup) requires Studio 2025.2.1 for version 8. Android API 35 and 36 SDKs are installed. Before a future Capacitor major upgrade, update Android Studio and follow the [official upgrade guide](https://capacitorjs.com/docs/updating/8-0).
+## Limits and constraints
+
+- Supabase requires a network connection. Offline write support is not included.
+- Supabase Auth email confirmation and Google OAuth require dashboard configuration and mobile deep linking. Email/password is implemented; Google OAuth is pending setup.
+- A publishable key is safe in the Android bundle only when table grants and RLS policies are correct. Secret keys and database passwords never enter `VITE_` variables or source control.
+- The provided composite screenshots are too small for pixel-exact asset and typography matching. A Figma file or full-resolution exports are needed for the final visual pass.
+- Member 2–4 business flows and complete usability evidence remain their own work.
+
+## Installable Android application
+
+`npm run build` creates `dist/`; `npx cap sync android` copies it into the native project. Android Studio or Gradle builds an APK. The UI, navigation and Auth session run inside Android's WebView. A local Express URL is optional for the current Member 1 screens because they use Supabase Auth and RLS directly; future complex operations can call the Express API.
