@@ -53,7 +53,8 @@ function MemberOneContent() {
   function openSearch(category = 'All') { setSearchCategory(category); navigate('search') }
   function back() {
     if (screen === 'provider-detail') navigate('search')
-    else if (screen === 'search' || screen === 'bookings' || screen === 'profile' || screen === 'member2-filters') navigate('home')
+    else if (screen === 'member2-filters') navigate('search')
+    else if (screen === 'search' || screen === 'bookings' || screen === 'profile') navigate('home')
     else if (screen === 'location' || screen === 'payments' || screen === 'feedback' || screen === 'feedback-history' || screen === 'reviews') navigate('profile')
     else if (screen === 'provider-register' || screen === 'earnings') navigate('provider')
     else if (screen === 'verification' || screen === 'settings') navigate('admin')
@@ -88,8 +89,8 @@ function MemberOneContent() {
     profile={auth.profile} onBack={back} onNavigate={navigate}/>
   else if (screen === 'admin' && auth.profile.role === 'ADMIN') content = <AdminDashboardScreen profile={auth.profile} onNavigate={navigate}/>
   else if (screen === 'verification' && auth.profile.role === 'ADMIN') content = <AdminVerificationScreen onNavigate={navigate}/>
-  else if (screen === 'member2-filters' && auth.profile.role === 'CUSTOMER') content = <Member2ServiceFiltersScreen providers={providers} initialCategory={searchCategory} onProvider={selectProvider} onBack={back}/>
-  else if (screen === 'profile' && auth.profile.role === 'CUSTOMER') content = <Member2ProfileScreen profile={auth.profile} onBack={back} onNavigate={navigate} onProfileUpdated={() => { void auth.refreshProfile() }}/>
+  else if (screen === 'member2-filters' && auth.profile.role === 'CUSTOMER') content = <Member2ServiceFiltersScreen providers={providers} initialCategory={searchCategory} onProvider={selectProvider} onBack={back} onNavigate={navigate}/>
+  else if (screen === 'profile' && auth.profile.role === 'CUSTOMER') content = <Member2ProfileScreen profile={auth.profile} onBack={back} onNavigate={navigate} onProfileUpdated={() => { void auth.refreshProfile() }} onSignOut={() => void auth.signOut()}/>
   else if (screen === 'location' && auth.profile.role === 'CUSTOMER') content = <Member2LocationScreen profile={auth.profile} onBack={back}/>
   else if (screen === 'payments' && auth.profile.role === 'CUSTOMER') content = <Member2PaymentScreen profile={auth.profile} onBack={back}/>
   else if (screen === 'feedback' && auth.profile.role === 'CUSTOMER') content = <Member2FeedbackScreen profile={auth.profile} onBack={back} onNavigate={navigate}/>
@@ -112,4 +113,5 @@ function MemberOneContent() {
 }
 
 export default function MemberOneApp() { return <AuthProvider><MemberOneContent/></AuthProvider> }
+
 

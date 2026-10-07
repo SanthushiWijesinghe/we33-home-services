@@ -6,7 +6,7 @@ import type { ProviderProfile } from '../providers/provider.types'
 
 const categories = ['All', 'Electrical', 'Plumbing', 'Cleaning', 'AC Repair', 'Painting', 'Carpentry']
 
-export function SearchProvidersScreen({ providers, loading, error, initialCategory, onProvider, onNavigate }: {
+export function SearchProvidersScreen({ providers, loading, error, initialCategory, onProvider, onNavigate, onFilter }: {
   providers: ProviderProfile[]; loading: boolean; error: string | null; initialCategory: string
   onProvider: (provider: ProviderProfile) => void; onNavigate: (screen: string) => void; onFilter?: () => void
 }) {
@@ -37,3 +37,4 @@ export function SearchProvidersScreen({ providers, loading, error, initialCatego
         : <StatusMessage>No approved providers match this search.</StatusMessage>}
     </main><BottomNav kind="customer" current="search" onNavigate={onNavigate}/></div>
 }
+
