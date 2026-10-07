@@ -1,0 +1,22 @@
+/* Member 2 customer preferences, filters, payments and feedback. */
+.member2-screen { gap: 14px; }
+.member2-card { background: #fff; border: 1px solid #f0e4dc; border-radius: 16px; padding: 16px; box-shadow: 0 4px 12px rgba(43, 31, 24, .04); }
+.member2-card h1, .member2-card h2 { margin: 0 0 8px; }
+.member2-card p { color: #766c66; line-height: 1.5; }
+.member2-form { display: grid; gap: 14px; }
+.member2-form label { display: grid; gap: 7px; color: #493f39; font-size: 13px; font-weight: 700; }
+.member2-form input, .member2-form select, .member2-form textarea { width: 100%; border: 1px solid #eaded6; border-radius: 10px; padding: 12px; font: inherit; background: #fff; box-sizing: border-box; }
+.member2-form textarea { resize: vertical; }
+.member2-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.member2-chips button { border: 1px solid #eaded6; background: #fff; color: #5e5149; border-radius: 999px; padding: 8px 12px; display: inline-flex; gap: 5px; align-items: center; }
+.member2-chips button.selected { background: #fff0e8; color: #e9500e; border-color: #f28a58; }
+.member2-card input[type='range'] { width: 100%; accent-color: #ed570f; }
+.member2-result-title { margin: 4px 0 0; font-size: 16px; }
+.member2-list-row, .member2-link-card { width: 100%; border: 1px solid #f0e4dc; background: #fff; border-radius: 13px; padding: 13px; display: flex; align-items: center; gap: 11px; text-align: left; color: #493f39; }
+.member2-list-row > span:nth-child(2), .member2-link-card > span { flex: 1; display: grid; gap: 3px; }
+.member2-list-row small, .member2-link-card small { color: #8c8179; }
+.member2-list-row > button { border: 0; background: transparent; color: #d94b17; }
+.member2-profile-head { display: flex; align-items: center; gap: 12px; padding: 4px 0; }
+.member2-profile-head h1 { margin: 0; font-size: 22px; }
+.member2-profile-head p { margin: 3px 0 0; color: #8c8179; }
+.member2-safe-banner { display: flex; gap: 9px; align-items: center; background: #eefaf4; color: #287a52; border: 1px solid #b9e5cb; border-radius: 12px; padding: 12px; font-size: 13px; }

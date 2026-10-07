@@ -11,11 +11,12 @@ import { ProviderDetailScreen } from '../features/providers/ProviderDetailScreen
 import { ProviderDashboardScreen, ProviderRegistrationScreen } from '../features/providers/ProviderScreens'
 import { AdminDashboardScreen, AdminVerificationScreen } from '../features/admin/AdminScreens'
 import { BottomNav, ScreenHeader, StatusMessage } from '../shared/components/MobileUi'
+import { Member2FeedbackHistoryScreen, Member2FeedbackScreen, Member2LocationScreen, Member2PaymentScreen, Member2ProfileScreen, Member2ReviewsScreen, Member2ServiceFiltersScreen } from '../features/member2/Member2Screens'
 import { listApprovedProviders } from '../features/providers/provider.service'
 import type { ProviderProfile } from '../features/providers/provider.types'
 
 type Screen = 'splash' | 'onboarding' | 'role' | 'login' | 'signup' | 'admin-login' | 'home' | 'search' |
-  'provider-detail' | 'provider' | 'provider-register' | 'admin' | 'verification' | 'bookings' | 'profile' | 'earnings' | 'settings'
+  'provider-detail' | 'provider' | 'provider-register' | 'admin' | 'verification' | 'bookings' | 'profile' | 'earnings' | 'settings' | 'member2-filters' | 'location' | 'payments' | 'feedback' | 'feedback-history' | 'reviews'
 
 function MemberOneContent() {
   const auth = useAuth()
@@ -52,7 +53,8 @@ function MemberOneContent() {
   function openSearch(category = 'All') { setSearchCategory(category); navigate('search') }
   function back() {
     if (screen === 'provider-detail') navigate('search')
-    else if (screen === 'search' || screen === 'bookings' || screen === 'profile') navigate('home')
+    else if (screen === 'search' || screen === 'bookings' || screen === 'profile' || screen === 'member2-filters') navigate('home')
+    else if (screen === 'location' || screen === 'payments' || screen === 'feedback' || screen === 'feedback-history' || screen === 'reviews') navigate('profile')
     else if (screen === 'provider-register' || screen === 'earnings') navigate('provider')
     else if (screen === 'verification' || screen === 'settings') navigate('admin')
     else if (screen === 'login' || screen === 'signup' || screen === 'admin-login') navigate('role')
@@ -78,7 +80,7 @@ function MemberOneContent() {
   else if (screen === 'home' && auth.profile.role === 'CUSTOMER') content = <HomeScreen profile={auth.profile} providers={providers}
     loading={catalogLoading} error={catalogError} onSearch={openSearch} onProvider={selectProvider} onNavigate={navigate}/>
   else if (screen === 'search' && auth.profile.role === 'CUSTOMER') content = <SearchProvidersScreen key={searchCategory}
-    providers={providers} loading={catalogLoading} error={catalogError} initialCategory={searchCategory} onProvider={selectProvider} onNavigate={navigate}/>
+    providers={providers} loading={catalogLoading} error={catalogError} initialCategory={searchCategory} onProvider={selectProvider} onNavigate={navigate} onFilter={() => navigate('member2-filters')}/>
   else if (screen === 'provider-detail' && auth.profile.role === 'CUSTOMER' && selectedProvider) content = <ProviderDetailScreen
     provider={selectedProvider} onBack={back} onNavigate={navigate}/>
   else if (screen === 'provider' && auth.profile.role === 'SERVICE_PROVIDER') content = <ProviderDashboardScreen profile={auth.profile} onNavigate={navigate}/>
@@ -86,11 +88,16 @@ function MemberOneContent() {
     profile={auth.profile} onBack={back} onNavigate={navigate}/>
   else if (screen === 'admin' && auth.profile.role === 'ADMIN') content = <AdminDashboardScreen profile={auth.profile} onNavigate={navigate}/>
   else if (screen === 'verification' && auth.profile.role === 'ADMIN') content = <AdminVerificationScreen onNavigate={navigate}/>
-  else if ((screen === 'bookings' || screen === 'profile') && auth.profile.role === 'CUSTOMER') content = <div className="m1-page">
-    <ScreenHeader title={screen === 'bookings' ? 'My Bookings' : 'My Profile'} onBack={back}/><main className="m1-scroll m1-placeholder">
-      <UserRound size={32}/><h1>{screen === 'bookings' ? 'Your bookings' : auth.profile.full_name}</h1>
-      <p>{screen === 'bookings' ? 'Your confirmed services will appear here.' : auth.session?.user.email}</p>
-      {screen === 'profile' && <button className="m1-secondary-btn" onClick={() => void auth.signOut()}><LogOut size={17}/> Log Out</button>}</main>
+  else if (screen === 'member2-filters' && auth.profile.role === 'CUSTOMER') content = <Member2ServiceFiltersScreen providers={providers} initialCategory={searchCategory} onProvider={selectProvider} onBack={back}/>
+  else if (screen === 'profile' && auth.profile.role === 'CUSTOMER') content = <Member2ProfileScreen profile={auth.profile} onBack={back} onNavigate={navigate} onProfileUpdated={() => { void auth.refreshProfile() }}/>
+  else if (screen === 'location' && auth.profile.role === 'CUSTOMER') content = <Member2LocationScreen profile={auth.profile} onBack={back}/>
+  else if (screen === 'payments' && auth.profile.role === 'CUSTOMER') content = <Member2PaymentScreen profile={auth.profile} onBack={back}/>
+  else if (screen === 'feedback' && auth.profile.role === 'CUSTOMER') content = <Member2FeedbackScreen profile={auth.profile} onBack={back} onNavigate={navigate}/>
+  else if (screen === 'feedback-history' && auth.profile.role === 'CUSTOMER') content = <Member2FeedbackHistoryScreen profile={auth.profile} onBack={back}/>
+  else if (screen === 'reviews' && auth.profile.role === 'CUSTOMER') content = <Member2ReviewsScreen providers={providers} onBack={back} onProvider={selectProvider}/>
+  else if (screen === 'bookings' && auth.profile.role === 'CUSTOMER') content = <div className="m1-page">
+    <ScreenHeader title="My Bookings" onBack={back}/><main className="m1-scroll m1-placeholder">
+      <h1>Your bookings</h1><p>Your confirmed services will appear here.</p></main>
     <BottomNav kind="customer" current={screen} onNavigate={navigate}/></div>
   else if ((screen === 'earnings' && auth.profile.role === 'SERVICE_PROVIDER') || (screen === 'settings' && auth.profile.role === 'ADMIN')) content = <div className="m1-page">
     <ScreenHeader title={screen === 'settings' ? 'Admin Settings' : 'Earnings'} onBack={back}/><main className="m1-scroll m1-placeholder">
@@ -105,3 +112,4 @@ function MemberOneContent() {
 }
 
 export default function MemberOneApp() { return <AuthProvider><MemberOneContent/></AuthProvider> }
+

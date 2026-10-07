@@ -8,7 +8,7 @@ const categories = ['All', 'Electrical', 'Plumbing', 'Cleaning', 'AC Repair', 'P
 
 export function SearchProvidersScreen({ providers, loading, error, initialCategory, onProvider, onNavigate }: {
   providers: ProviderProfile[]; loading: boolean; error: string | null; initialCategory: string
-  onProvider: (provider: ProviderProfile) => void; onNavigate: (screen: string) => void
+  onProvider: (provider: ProviderProfile) => void; onNavigate: (screen: string) => void; onFilter?: () => void
 }) {
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState(initialCategory)
@@ -24,7 +24,7 @@ export function SearchProvidersScreen({ providers, loading, error, initialCatego
   }, [providers, category, query, sort])
 
   return <div className="m1-page"><header className="m1-screen-header"><button className="m1-icon-btn" onClick={() => onNavigate('home')} aria-label="Back"><ArrowLeft size={20}/></button>
-    <strong>Search Providers</strong><span className="m1-header-action"><SlidersHorizontal size={18}/></span></header>
+    <strong>Search Providers</strong><button className="m1-header-action" onClick={onFilter} aria-label="Open advanced filters"><SlidersHorizontal size={18}/></button></header>
     <main className="m1-scroll"><div className="m1-search-intro"><h1>Find your trusted pro.</h1><p>Search services or professionals.</p></div>
       <label className="m1-search-input"><Search size={18}/><input value={query} onChange={event => setQuery(event.target.value)} placeholder="Search services or professionals" autoFocus/>
         {query && <button onClick={() => setQuery('')} aria-label="Clear search"><X size={16}/></button>}</label>
