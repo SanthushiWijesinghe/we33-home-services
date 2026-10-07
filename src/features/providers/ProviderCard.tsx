@@ -3,7 +3,7 @@ import { formatLkr } from '../../shared/components/MobileUi'
 import type { ProviderProfile } from './provider.types'
 
 export function ProviderCard({ provider, onSelect }: { provider: ProviderProfile; onSelect: (provider: ProviderProfile) => void }) {
-  const initials = provider.display_name.split(' ').slice(0, 2).map(part => part[0]).join('').toUpperCase()
+  const initials = (provider.display_name || '').split(' ').slice(0, 2).map(part => part[0]).join('').toUpperCase()
   return <article className="m1-provider-card">
     <div className="m1-provider-avatar">{provider.avatar_url ? <img src={provider.avatar_url} alt=""/> : initials}</div>
     <div className="m1-provider-info"><div className="m1-provider-name"><strong>{provider.display_name}</strong>

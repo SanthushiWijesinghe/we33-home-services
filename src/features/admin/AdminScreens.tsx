@@ -26,7 +26,7 @@ export function AdminDashboardScreen({ profile, onNavigate }: { profile: AppProf
         <PrimaryButton onClick={() => onNavigate('verification')}>Open Queue <ArrowRight size={16}/></PrimaryButton></section>
       <div className="m1-section-title"><h2>Recent Approvals</h2><button onClick={() => onNavigate('verification')}>View All</button></div>
       {approved.length ? <div className="m1-provider-list">{approved.slice(0, 3).map(provider => <div className="m1-admin-provider-row" key={provider.user_id}>
-        <span className="m1-mini-avatar">{provider.display_name.slice(0, 1)}</span><span><strong>{provider.display_name}</strong><small>{provider.category} · {provider.location}</small></span><BadgeCheck size={18}/></div>)}</div>
+        <span className="m1-mini-avatar">{(provider.display_name || '').slice(0, 1)}</span><span><strong>{provider.display_name}</strong><small>{provider.category} · {provider.location}</small></span><BadgeCheck size={18}/></div>)}</div>
         : <StatusMessage>No providers have been approved yet.</StatusMessage>}
       <div className="m1-assurance"><ShieldCheck size={19}/><span><strong>Safety comes first</strong><small>Review each document before approval.</small></span></div>
     </>}</main><BottomNav kind="admin" current="admin" onNavigate={onNavigate}/></div>
@@ -55,7 +55,7 @@ export function AdminVerificationScreen({ onNavigate }: { onNavigate: (screen: s
     if (!selected) return
     if (status === 'rejected' && !note.trim()) { setError('Enter a reason before rejecting a provider.'); return }
     setBusy(true); setError(''); setSuccess('')
-    try { await reviewProvider(selected.user_id, status, note); setSuccess(`${selected.display_name} ${status}.`)
+    try { await reviewProvider(selected.user_id, status, note); setSuccess(`${(selected.display_name || '')} ${status}.`)
       setSelected(null); setNote(''); await refresh() }
     catch (cause) { setError(cause instanceof Error ? cause.message : 'Review failed.') }
     finally { setBusy(false) }
@@ -65,8 +65,8 @@ export function AdminVerificationScreen({ onNavigate }: { onNavigate: (screen: s
   return <div className="m1-page"><ScreenHeader title="Provider Verification" onBack={() => selected ? setSelected(null) : onNavigate('admin')}/>
     <main className="m1-scroll"><div className="m1-admin-intro"><small>ADMIN CONTROL</small><h1>Provider Verification</h1><p>Review each application and its private documents.</p></div>
       {error && <StatusMessage kind="error">{error}</StatusMessage>}{success && <StatusMessage kind="success">{success}</StatusMessage>}
-      {selected ? <div className="m1-review-detail"><div className="m1-review-person"><span className="m1-mini-avatar">{selected.display_name.slice(0, 1)}</span>
-        <div><strong>{selected.display_name}</strong><small>{selected.category} · {selected.location}</small></div><span className="m1-status-pill">{statusLabel(selected.verification_status)}</span></div>
+      {selected ? <div className="m1-review-detail"><div className="m1-review-person"><span className="m1-mini-avatar">{(selected.display_name || '').slice(0, 1)}</span>
+        <div><strong>{(selected.display_name || '')}</strong><small>{selected.category} · {selected.location}</small></div><span className="m1-status-pill">{statusLabel(selected.verification_status)}</span></div>
         <div className="m1-detail-grid"><span>Experience <strong>{selected.years_experience} years</strong></span>
           <span>Starting price <strong>LKR {selected.base_price_lkr.toLocaleString('en-LK')}</strong></span></div>
         <p>{selected.bio || 'No description provided.'}</p><h2>Identity Documents</h2>
@@ -79,7 +79,7 @@ export function AdminVerificationScreen({ onNavigate }: { onNavigate: (screen: s
         : <><div className="m1-chip-row">{(['pending', 'all', 'approved', 'rejected'] as const).map(item => <button key={item}
           className={filter === item ? 'selected' : ''} onClick={() => setFilter(item)}>{item === 'all' ? 'All' : statusLabel(item)}</button>)}</div>
           {loading ? <StatusMessage>Loading applications…</StatusMessage> : shown.length ? <div className="m1-provider-list">{shown.map(provider => <button className="m1-verification-card" key={provider.user_id} onClick={() => setSelected(provider)}>
-            <span className="m1-mini-avatar">{provider.display_name.slice(0, 1)}</span><span><strong>{provider.display_name}</strong><small>{provider.category} · {provider.location}</small>
+            <span className="m1-mini-avatar">{(provider.display_name || '').slice(0, 1)}</span><span><strong>{provider.display_name}</strong><small>{provider.category} · {provider.location}</small>
               <em><Clock3 size={12}/> {statusLabel(provider.verification_status)}</em></span><ArrowRight size={17}/></button>)}</div>
             : <StatusMessage>No {filter === 'all' ? '' : filter} applications found.</StatusMessage>}</>}
     </main><BottomNav kind="admin" current="verification" onNavigate={onNavigate}/></div>

@@ -20,9 +20,9 @@ export function ProviderDashboardScreen({ profile, onNavigate }: { profile: AppP
   const [error, setError] = useState('')
   useEffect(() => { let active = true; void getOwnProvider(profile.id).then(data => { if (active) setProvider(data) })
     .catch(cause => { if (active) setError(cause.message) }).finally(() => { if (active) setLoading(false) }); return () => { active = false } }, [profile.id])
-  return <div className="m1-page"><ScreenHeader title="Provider Dashboard" action={<button className="m1-mini-avatar" onClick={() => onNavigate('provider-register')} aria-label="Account">{profile.full_name.slice(0, 1)}</button>}/>
-    <main className="m1-scroll"><div className="m1-provider-welcome"><span className="m1-large-avatar">{profile.full_name.slice(0, 1).toUpperCase()}</span>
-      <div><strong>Hello {profile.full_name.split(' ')[0]} 👋</strong><small>{provider?.verification_status === 'approved' ? 'Verified Partner' : 'Service Partner'}</small></div>
+  return <div className="m1-page"><ScreenHeader title="Provider Dashboard" action={<button className="m1-mini-avatar" onClick={() => onNavigate('provider-register')} aria-label="Account">{(profile.full_name || '').slice(0, 1)}</button>}/>
+    <main className="m1-scroll"><div className="m1-provider-welcome"><span className="m1-large-avatar">{(profile.full_name || '').slice(0, 1).toUpperCase()}</span>
+      <div><strong>Hello {(profile.full_name || '').split(' ')[0]} 👋</strong><small>{provider?.verification_status === 'approved' ? 'Verified Partner' : 'Service Partner'}</small></div>
       <span className="m1-rating-pill"><Star size={13} fill="currentColor"/> {provider?.rating_count ? provider.rating_avg.toFixed(1) : 'New'}</span></div>
       {loading ? <StatusMessage>Loading your workspace…</StatusMessage> : error ? <StatusMessage kind="error">{error}</StatusMessage>
         : !provider ? <div className="m1-callout"><ShieldCheck size={25}/><div><strong>Complete your provider registration</strong><p>Add service details and verification documents to join the provider directory.</p></div>

@@ -16,7 +16,7 @@ export function HomeScreen({ profile, providers, loading, error, onSearch, onPro
 }) {
   return <div className="m1-page">
     <header className="m1-home-top"><Brand compact/><span><button className="m1-icon-btn" aria-label="Notifications"><Bell size={17}/></button>
-      <button className="m1-mini-avatar" onClick={() => onNavigate('profile')} aria-label="Profile">{profile.full_name.slice(0, 1).toUpperCase()}</button></span></header>
+      <button className="m1-mini-avatar" onClick={() => onNavigate('profile')} aria-label="Profile">{(profile.full_name || '').slice(0, 1).toUpperCase()}</button></span></header>
     <main className="m1-scroll">
       <div className="m1-location"><div><small>Service Location</small><strong><MapPin size={15}/> Colombo 03, SL <ChevronDown size={14}/></strong></div><span><ShieldCheck size={17}/> 100%<br/>Guaranteed</span></div>
       <button className="m1-searchbar" onClick={() => onSearch()}><Search size={18}/><span>Search plumber, electrician, cleaning...</span><span className="m1-search-filter">☷</span></button>

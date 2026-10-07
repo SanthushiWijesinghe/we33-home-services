@@ -7,6 +7,15 @@ import type { UserRole } from '../../shared/types/roles'
 import { completeMobileAuthRedirect, getEmailRedirectUrl } from './authRedirect'
 
 export type AppProfile = { id: string; full_name: string; role: UserRole; phone: string | null }
+
+function normalizeProfile(data: Partial<AppProfile> | null, user: Session['user']): AppProfile {
+  return {
+    id: data?.id || user.id,
+    full_name: data?.full_name || user.user_metadata?.full_name || user.email?.split('@')[0] || '',
+    role: data?.role || 'CUSTOMER',
+    phone: data?.phone || null,
+  }
+}
 type SignupRole = Extract<UserRole, 'CUSTOMER' | 'SERVICE_PROVIDER'>
 type AuthValue = {
   session: Session | null
@@ -72,7 +81,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     void supabase.from('profiles').select('id, full_name, role, phone').eq('id', session.user.id).single()
       .then(({ data, error: profileError }) => {
         if (!active) return
-        setProfile(profileError ? null : data as AppProfile)
+        setProfile(profileError ? null : normalizeProfile(data as Partial<AppProfile>, session.user))
         setError(profileError ? `Account profile unavailable: ${profileError.message}. Apply the Supabase migration first.` : null)
         setLoading(false)
       })
@@ -102,7 +111,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { data, error: profileError } = await requireSupabase().from('profiles')
         .select('id, full_name, role, phone').eq('id', session.user.id).single()
       if (profileError) throw profileError
-      setProfile(data as AppProfile)
+      setProfile(normalizeProfile(data as Partial<AppProfile>, session.user))
     },
   }), [session, profile, loading, error])
 

@@ -6,7 +6,7 @@ export function ProviderDetailScreen({ provider, onBack, onNavigate }: {
   provider: ProviderProfile; onBack: () => void; onNavigate: (screen: string) => void
 }) {
   return <div className="m1-page"><ScreenHeader title="Provider Details" onBack={onBack}/><main className="m1-scroll">
-    <div className="m1-detail-banner"><div className="m1-detail-avatar">{provider.avatar_url ? <img src={provider.avatar_url} alt=""/> : provider.display_name.slice(0, 1)}</div></div>
+    <div className="m1-detail-banner"><div className="m1-detail-avatar">{provider.avatar_url ? <img src={provider.avatar_url} alt=""/> : (provider.display_name || '').slice(0, 1)}</div></div>
     <div className="m1-detail-content"><h1>{provider.display_name} <BadgeCheck size={19} fill="#e96a25" color="white"/></h1>
       <p>{provider.category} · {provider.years_experience} years experience</p>
       <div className="m1-detail-metrics"><span><Star size={17} fill="currentColor"/> {provider.rating_count ? provider.rating_avg.toFixed(1) : 'New'} rating</span>
