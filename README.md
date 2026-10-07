@@ -35,7 +35,7 @@ Node.js 22+, npm, Android Studio with SDK Platform 35+, and a Supabase project. 
 
 ## Configure Supabase
 
-1. In the Supabase dashboard, open **SQL Editor**. Review and run [`supabase/migrations/20261007_member1_foundation.sql`](supabase/migrations/20261007_member1_foundation.sql) once. It creates `profiles`, `provider_profiles`, `provider_documents`, RLS policies, the private document bucket, and admin verification function. Do not run a migration from an unreviewed source.
+1. In the Supabase dashboard, open **SQL Editor**. Review and run [`supabase/migrations/20261007_member1_foundation.sql`](supabase/migrations/20261007_member1_foundation.sql). It creates `profiles`, `provider_profiles`, `provider_documents`, RLS policies, the private document bucket, and admin verification function. It also adds profiles for users who signed up before the trigger existed, without changing existing roles. If you ran an earlier copy of this migration before signing up, run the updated file again so that backfill executes.
 2. Copy `.env.example` to `.env` in the repository root. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` using **Connect** or **Project Settings → API Keys**. The publishable key may be shipped in the app; RLS controls data access. Do not put an `sb_secret_...` key, service role key, or database password in any `VITE_` variable.
 3. In Supabase **Authentication**, enable email/password sign-in. If email confirmation is enabled, configure the callback URLs below before registering new accounts.
 4. For a separate admin account, create/sign up the account, then have a trusted project operator set its `profiles.role` to `ADMIN` in the SQL Editor. Public signup can never request ADMIN. Example, after replacing the email deliberately:

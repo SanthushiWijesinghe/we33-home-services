@@ -75,6 +75,16 @@ drop trigger if exists auth_user_created_profile on auth.users;
 create trigger auth_user_created_profile after insert on auth.users
 for each row execute function public.create_profile_for_new_user();
 
+-- Include people who signed up before this migration installed the trigger.
+-- Never take ADMIN from public signup metadata, and preserve existing profiles.
+insert into public.profiles (id, full_name, role)
+select id,
+       coalesce(raw_user_meta_data ->> 'full_name', ''),
+       case when upper(coalesce(raw_user_meta_data ->> 'role', '')) = 'SERVICE_PROVIDER'
+            then 'SERVICE_PROVIDER' else 'CUSTOMER' end
+from auth.users
+on conflict (id) do nothing;
+
 create or replace function public.is_admin()
 returns boolean language sql stable security definer set search_path = '' as $$
   select exists(select 1 from public.profiles where id = (select auth.uid()) and role = 'ADMIN');
