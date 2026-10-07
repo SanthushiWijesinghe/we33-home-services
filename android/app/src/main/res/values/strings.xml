@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">HomeServices</string>
+    <string name="title_activity_main">HomeServices</string>
+    <string name="package_name">lk.we33.homeservices</string>
+    <string name="custom_url_scheme">lk.we33.homeservices</string>
+</resources>

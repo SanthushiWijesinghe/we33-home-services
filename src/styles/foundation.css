@@ -1,0 +1,30 @@
+@media (min-width: 781px) {
+  .bottom-nav { display: none; }
+}
+
+@media (max-width: 780px) {
+  .bottom-nav {
+    height: calc(59px + env(safe-area-inset-bottom));
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .topbar {
+    height: calc(64px + env(safe-area-inset-top));
+    padding-top: env(safe-area-inset-top);
+  }
+  .native-android .announcement {
+    height: calc(27px + max(24px, env(safe-area-inset-top)));
+    padding-top: max(24px, env(safe-area-inset-top));
+  }
+  .native-android .topbar {
+    height: 64px;
+    padding-top: 0;
+  }
+  .hero-art {
+    top: 215px;
+    transform: scale(.82);
+    transform-origin: top right;
+  }
+}
+
+.async-state { padding: 24px; text-align: center; color: var(--muted); font-size: 12px; }
+.async-state button { border: 0; border-radius: 6px; background: var(--orange); color: white; padding: 8px 12px; }
