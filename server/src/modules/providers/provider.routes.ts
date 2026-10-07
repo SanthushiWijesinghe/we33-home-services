@@ -43,9 +43,13 @@ providerRoutes.get('/me', requireAuth, requireRole('SERVICE_PROVIDER'), async (r
 providerRoutes.put('/me', requireAuth, requireRole('SERVICE_PROVIDER'), async (request, response, next) => {
   try {
     const input = profileInput.parse(request.body)
-    const { data, error } = await userSupabase(request.auth!.accessToken)
-      .from('provider_profiles').upsert({ user_id: request.auth!.userId, ...input }, { onConflict: 'user_id' })
-      .select('*').single()
+    const client = userSupabase(request.auth!.accessToken)
+    const { data: existing, error: lookupError } = await client.from('provider_profiles')
+      .select('user_id').eq('user_id', request.auth!.userId).maybeSingle()
+    if (lookupError) throw lookupError
+    const { data, error } = existing
+      ? await client.from('provider_profiles').update(input).eq('user_id', request.auth!.userId).select('*').single()
+      : await client.from('provider_profiles').insert({ user_id: request.auth!.userId, ...input }).select('*').single()
     if (error) throw error
     response.json({ provider: data })
   } catch (error) { next(error) }

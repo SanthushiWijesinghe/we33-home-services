@@ -18,8 +18,11 @@ export async function getOwnProvider(userId: string): Promise<ProviderProfile | 
 }
 
 export async function saveOwnProvider(userId: string, input: ProviderInput): Promise<ProviderProfile> {
-  const { data, error } = await requireSupabase().from('provider_profiles')
-    .upsert({ user_id: userId, ...input }, { onConflict: 'user_id' }).select('*').single()
+  const client = requireSupabase()
+  const existing = await getOwnProvider(userId)
+  const { data, error } = existing
+    ? await client.from('provider_profiles').update(input).eq('user_id', userId).select('*').single()
+    : await client.from('provider_profiles').insert({ user_id: userId, ...input }).select('*').single()
   if (error) throw error
   return data as ProviderProfile
 }

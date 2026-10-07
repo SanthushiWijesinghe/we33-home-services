@@ -7,6 +7,13 @@ import type { AppProfile } from '../auth/AuthProvider'
 
 const categoryOptions = ['Electrical', 'Plumbing', 'AC Repair', 'Carpentry', 'Painting', 'Cleaning']
 
+function errorMessage(cause: unknown, fallback: string): string {
+  if (cause && typeof cause === 'object' && 'message' in cause && typeof cause.message === 'string') {
+    return cause.message
+  }
+  return fallback
+}
+
 export function ProviderDashboardScreen({ profile, onNavigate }: { profile: AppProfile; onNavigate: (screen: string) => void }) {
   const [provider, setProvider] = useState<ProviderProfile | null>(null)
   const [loading, setLoading] = useState(true)
@@ -54,7 +61,7 @@ export function ProviderRegistrationScreen({ profile, onBack, onNavigate }: {
       const result = await saveOwnProvider(profile.id, form)
       for (const [kind, file] of Object.entries(files)) if (file) await uploadProviderDocument(profile.id, kind as ProviderDocument['kind'], file)
       setExisting(result); setFiles({}); setSuccess('Provider profile saved. The admin team can now review your details.')
-    } catch (cause) { setError(cause instanceof Error ? cause.message : 'Unable to save provider profile.') }
+    } catch (cause) { setError(errorMessage(cause, 'Unable to save provider profile.')) }
     finally { setSaving(false) }
   }
   return <div className="m1-page"><ScreenHeader title="Provider Registration" onBack={onBack}/><main className="m1-scroll">
