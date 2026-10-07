@@ -37,7 +37,7 @@ Node.js 22+, npm, Android Studio with SDK Platform 35+, and a Supabase project. 
 
 1. In the Supabase dashboard, open **SQL Editor**. Review and run [`supabase/migrations/20261007_member1_foundation.sql`](supabase/migrations/20261007_member1_foundation.sql) once. It creates `profiles`, `provider_profiles`, `provider_documents`, RLS policies, the private document bucket, and admin verification function. Do not run a migration from an unreviewed source.
 2. Copy `.env.example` to `.env` in the repository root. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` using **Connect** or **Project Settings → API Keys**. The publishable key may be shipped in the app; RLS controls data access. Do not put an `sb_secret_...` key, service role key, or database password in any `VITE_` variable.
-3. In Supabase **Authentication**, enable email/password sign-in. If email confirmation is enabled, new users must confirm before login. For Android confirmation links, configure an approved mobile redirect/deep link before relying on email links inside the app; this is pending.
+3. In Supabase **Authentication**, enable email/password sign-in. If email confirmation is enabled, configure the callback URLs below before registering new accounts.
 4. For a separate admin account, create/sign up the account, then have a trusted project operator set its `profiles.role` to `ADMIN` in the SQL Editor. Public signup can never request ADMIN. Example, after replacing the email deliberately:
 
    ```sql
@@ -48,6 +48,20 @@ Node.js 22+, npm, Android Studio with SDK Platform 35+, and a Supabase project. 
 5. Providers sign up with the provider role, complete **Provider Registration**, and upload both ID sides. Admin approval requires both documents. Only approved providers appear in customer search.
 
 The migration has not been run by this repository. An empty or unmigrated project will show empty/error states rather than fabricated provider data.
+
+### Email confirmation callbacks
+
+In Supabase **Authentication → URL Configuration**, set the **Site URL** to your running or deployed web app URL. For the local Vite preview, use `http://localhost:5173`. Add these exact **Redirect URLs**:
+
+```text
+lk.we33.homeservices://auth/callback
+http://localhost:5173/auth/callback
+http://127.0.0.1:5173/auth/callback
+```
+
+The Android signup flow sends the first URL with `emailRedirectTo`; the browser preview uses its own origin and `/auth/callback`. Android handles both a link that opens the running app and one that starts it from closed. Keep the default confirmation email link using `{{ .ConfirmationURL }}` if you edit Supabase email templates. Rebuild and reinstall the Android APK after changes to the native intent filter.
+
+Open a new Android confirmation email on the emulator or phone to return directly to the app. If you confirm from desktop email instead, return to the Android app and sign in with your password. A confirmation email sent before these settings were changed may still point to the old `localhost:3000` address; clicking it can confirm the account even though that final page does not load. Never share a callback URL containing session tokens.
 
 ## Run the mobile frontend
 

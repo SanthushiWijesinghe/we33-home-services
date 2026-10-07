@@ -18,7 +18,7 @@ The assignment already has a React UI and an Android wrapper. Rewriting in a dif
 ## Limits and constraints
 
 - Supabase requires a network connection. Offline write support is not included.
-- Supabase Auth email confirmation and Google OAuth require dashboard configuration and mobile deep linking. Email/password is implemented; Google OAuth is pending setup.
+- Email/password and Android confirmation deep-link handling are implemented. Supabase's redirect allow list and Site URL still require dashboard configuration. Google OAuth awaits provider setup.
 - A publishable key is safe in the Android bundle only when table grants and RLS policies are correct. Secret keys and database passwords never enter `VITE_` variables or source control.
 - The provided composite screenshots are too small for pixel-exact asset and typography matching. A Figma file or full-resolution exports are needed for the final visual pass.
 - Member 2–4 business flows and complete usability evidence remain their own work.

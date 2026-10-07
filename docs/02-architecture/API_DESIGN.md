@@ -4,7 +4,8 @@ The mobile app uses Supabase Auth and RLS-protected data access for Member 1's c
 
 | Method | Endpoint / operation | Purpose | Role | Request → response | Requirement | Owner | Status |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| SDK | `auth.signUp` | Register customer/provider | Public | name, email, password, role → user/confirmation | FR1 | M1 | Implemented in mobile |
+| SDK | `auth.signUp` | Register customer/provider with platform callback URL | Public | name, email, password, role → user/confirmation | FR1 | M1 | Implemented in mobile; allow list required |
+| SDK | `auth.setSession` / `auth.exchangeCodeForSession` | Complete Android email callback | Public | deep-link tokens or code → session | FR1 | M1 | Implemented in mobile; allow list required |
 | SDK | `auth.signInWithPassword` | Sign in | Public | email, password → session | FR1 | M1 | Implemented in mobile |
 | SDK | `auth.signOut` | End session | Signed in | — → success | FR1 | M1 | Implemented in mobile |
 | GET | `/api/health` | API configuration state | Public | — → status/database configured | NFR | Shared | Implemented |
@@ -21,6 +22,8 @@ The mobile app uses Supabase Auth and RLS-protected data access for Member 1's c
 | RPC | `review_provider` | Trusted verification decision | A | provider, status, note → profile | FR4 | M1 | Migration written |
 
 For Express, `C`, `P` and `A` mean CUSTOMER, SERVICE_PROVIDER and ADMIN. `Authorization: Bearer <Supabase access token>` is required on protected routes. The server verifies that token with Supabase Auth and reads the current role from the `profiles` table; it does not trust a role sent by the phone. The app's direct Supabase calls are protected by grants and RLS. Error shape: `{ "error": { "code": "...", "message": "..." } }`.
+
+Email confirmation returns to `lk.we33.homeservices://auth/callback` on Android or `<web origin>/auth/callback` in a browser. These are app callbacks, not Express `/api` endpoints. Supabase Authentication → URL Configuration must allow the matching redirect URL.
 
 ## Planned interfaces for other members
 
