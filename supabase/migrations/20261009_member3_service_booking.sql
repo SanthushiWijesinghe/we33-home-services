@@ -178,11 +178,15 @@ using ((select public.is_admin()));
 
 drop policy if exists member3_services_read on public.services;
 create policy member3_services_read on public.services for select to anon, authenticated
-using ((is_active and exists (
-  select 1 from public.service_categories c where c.id = category_id and c.is_active
-)) and exists (
-  select 1 from public.provider_profiles pp where pp.user_id = provider_id and pp.verification_status = 'approved'
-)) or provider_id = (select auth.uid()) or (select public.is_admin()));
+using (
+  (is_active and exists (
+    select 1 from public.service_categories c where c.id = category_id and c.is_active
+  ) and exists (
+    select 1 from public.provider_profiles pp where pp.user_id = provider_id and pp.verification_status = 'approved'
+  ))
+  or provider_id = (select auth.uid())
+  or (select public.is_admin())
+);
 drop policy if exists member3_services_insert on public.services;
 create policy member3_services_insert on public.services for insert to authenticated
 with check (public.member3_can_manage_service(provider_id, category_id));
