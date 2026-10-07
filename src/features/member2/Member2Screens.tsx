@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
-import { ChevronRight, CreditCard, Heart, LogOut, MapPin, Plus, Save, Search, Star, Trash2, Wallet } from 'lucide-react'
+import { CalendarDays, ChevronRight, CreditCard, Heart, LogOut, MapPin, Plus, Save, Search, Star, Trash2, Wallet } from 'lucide-react'
 import { BottomNav, PrimaryButton, ScreenHeader, StatusMessage } from '../../shared/components/MobileUi'
 import type { AppProfile } from '../auth/AuthProvider'
 import type { ProviderProfile } from '../providers/provider.types'
@@ -279,13 +279,36 @@ export function Member2FeedbackHistoryScreen({ profile, onBack }: { profile: App
 
   return <div className="m1-page">
     <ScreenHeader title="My Feedback" onBack={onBack}/>
-    <main className="m1-scroll member2-screen">
+    <main className="m1-scroll member2-screen member2-feedback-history">
+      <div className="member2-feedback-intro">
+        <span className="member2-feedback-eyebrow">YOUR VOICE</span>
+        <h1>Feedback history</h1>
+        <p>See the thoughts you have shared with HomeService.</p>
+        {!loading && !error && <span className="member2-feedback-count">{items.length} {items.length === 1 ? 'message' : 'messages'}</span>}
+      </div>
       {error && <StatusMessage kind="error">{error}</StatusMessage>}
-      {loading && <StatusMessage>Loading feedback…</StatusMessage>}
-      {!loading && !error && (items.length ? items.map(item => <div className="member2-card" key={item.id}>
-        <small>{new Date(item.created_at).toLocaleDateString()}</small>
-        <h2>{item.category}</h2><p>{item.message}</p><em>{item.status}</em>
-      </div>) : <StatusMessage>You have not submitted feedback yet.</StatusMessage>)}
+      {loading && <div className="member2-feedback-empty" role="status">
+        <span className="member2-feedback-empty-icon"><Heart size={24}/></span>
+        <h2>Loading your feedback</h2>
+        <p>Your messages will appear here shortly.</p>
+      </div>}
+      {!loading && !error && (items.length ? items.map(item => <article className="member2-feedback-entry" key={item.id}>
+        <div className="member2-feedback-entry-head">
+          <span className="member2-feedback-entry-icon"><Heart size={19}/></span>
+          <div className="member2-feedback-entry-heading">
+            <span className="member2-feedback-entry-label">FEEDBACK</span>
+            <h2>{item.category}</h2>
+          </div>
+          <span className={`member2-feedback-status member2-feedback-status--${item.status}`}>{item.status}</span>
+        </div>
+        <p className="member2-feedback-message">{item.message}</p>
+        <div className="member2-feedback-entry-footer"><CalendarDays size={15}/> Submitted {new Intl.DateTimeFormat('en-LK', { day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(item.created_at))}</div>
+      </article>) : <div className="member2-feedback-empty">
+        <span className="member2-feedback-empty-icon"><Heart size={24}/></span>
+        <h2>No feedback yet</h2>
+        <p>Share your experience to help improve HomeService.</p>
+        <button type="button" onClick={onBack}>Write feedback <ChevronRight size={16}/></button>
+      </div>)}
     </main>
   </div>
 }
