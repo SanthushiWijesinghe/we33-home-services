@@ -31,5 +31,6 @@
 .member4-empty p { margin:0; color:#7c7168; font-size:14px; }
 .member4-support-link { display:flex; align-items:center; gap:9px; min-height:48px; padding:11px; border:1px solid #efded2; border-radius:11px; background:#fffaf5; color:#b94a16; text-align:left; font-size:14px; font-weight:750; }
 .member4-support-link svg:last-child { margin-left:auto; }
+.m1-provider-detail-actions { display:grid; gap:14px; }
 .member4-section-title { margin:8px 0 0; font-size:18px; }
 .member4-admin-note { display:flex; align-items:start; gap:7px; padding:11px; border-radius:9px; background:#eff7f2; color:#286c49!important; }
