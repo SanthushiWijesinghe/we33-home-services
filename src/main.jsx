@@ -6,6 +6,7 @@ import './styles/foundation.css'
 import './styles/member-one.css'
 import './styles/member-two.css'
 import './styles/member-three.css'
+import './styles/member-four.css'
 if (Capacitor.getPlatform() === 'android') document.body.classList.add('native-android')
 createRoot(document.getElementById('root')).render(<App />)
 

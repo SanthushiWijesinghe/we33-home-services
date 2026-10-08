@@ -366,6 +366,7 @@ export function Member3BookingScreen({ provider, service, onBack, onNavigate }: 
           <span>{dateTime(slots.find(slot => slot.id === booking.slot_id)?.start_at ?? new Date().toISOString())}</span>
           <span>{booking.address_text}</span><strong>{formatLkr(booking.price_lkr)}</strong></div>
         <PrimaryButton onClick={() => onNavigate('notifications')}><Bell size={17}/> View notifications</PrimaryButton>
+        <button className="member3-outline" onClick={() => onNavigate('bookings')}>View my booking</button>
         <button className="member3-outline" onClick={onBack}>Back to services</button>
       </div> : <>
         <div className="member3-intro"><span>BOOK A VERIFIED PRO</span><h1>{service.title}</h1>

@@ -71,6 +71,9 @@ export function Member2ProfileScreen({ profile, onBack, onNavigate, onProfileUpd
       <button className="member2-link-card" onClick={() => onNavigate('feedback')}>
         <Heart/><span><strong>Send feedback</strong><small>Tell us about your experience</small></span><ChevronRight/>
       </button>
+      <button className="member2-link-card" onClick={() => onNavigate('member4-support')}>
+        <Heart/><span><strong>Help & Support</strong><small>Send and track support requests</small></span><ChevronRight/>
+      </button>
       <button className="m1-secondary-btn" onClick={onSignOut}><LogOut size={17}/> Log out</button>
     </main>
     <BottomNav kind="customer" current="profile" onNavigate={onNavigate}/>

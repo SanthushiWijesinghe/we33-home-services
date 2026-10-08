@@ -67,7 +67,8 @@ begin
                              where provider_id = target_provider), 0),
       rating_count = (select count(*) from public.provider_reviews where provider_id = target_provider)
   where user_id = target_provider;
-  return coalesce(new, old);
+  if tg_op = 'DELETE' then return old; end if;
+  return new;
 end;
 $$;
 drop trigger if exists member4_reviews_rating on public.provider_reviews;
@@ -79,7 +80,7 @@ alter table public.provider_reviews enable row level security;
 alter table public.support_requests enable row level security;
 revoke all on public.booking_events, public.provider_reviews, public.support_requests from anon, authenticated;
 grant select on public.booking_events, public.support_requests to authenticated;
-grant select on public.provider_reviews to anon, authenticated;
+grant select on public.provider_reviews to authenticated;
 grant insert (user_id, subject, message) on public.support_requests to authenticated;
 
 drop policy if exists member4_events_participants_read on public.booking_events;
@@ -87,7 +88,9 @@ create policy member4_events_participants_read on public.booking_events for sele
 using (exists (select 1 from public.bookings b where b.id = booking_id
   and (b.customer_id = (select auth.uid()) or b.provider_id = (select auth.uid()) or (select public.is_admin()))));
 drop policy if exists member4_reviews_public_read on public.provider_reviews;
-create policy member4_reviews_public_read on public.provider_reviews for select to anon, authenticated using (true);
+drop policy if exists member4_reviews_owner_read on public.provider_reviews;
+create policy member4_reviews_owner_read on public.provider_reviews for select to authenticated
+using (customer_id = (select auth.uid()) or (select public.is_admin()));
 drop policy if exists member4_support_owner_read on public.support_requests;
 create policy member4_support_owner_read on public.support_requests for select to authenticated
 using (user_id = (select auth.uid()) or (select public.is_admin()));
@@ -119,6 +122,20 @@ $$;
 revoke all on function public.member4_list_bookings() from public;
 grant execute on function public.member4_list_bookings() to authenticated;
 
+-- Public review cards omit customer and booking identifiers.
+create or replace function public.member4_list_provider_reviews(p_provider_id uuid)
+returns table (id uuid, provider_id uuid, rating integer, comment text, created_at timestamptz, updated_at timestamptz)
+language sql stable security definer set search_path = '' as $$
+  select r.id, r.provider_id, r.rating, r.comment, r.created_at, r.updated_at
+  from public.provider_reviews r
+  join public.provider_profiles pp on pp.user_id = r.provider_id and pp.verification_status = 'approved'
+  where r.provider_id = p_provider_id
+  order by r.created_at desc
+  limit 100;
+$$;
+revoke all on function public.member4_list_provider_reviews(uuid) from public;
+grant execute on function public.member4_list_provider_reviews(uuid) to anon, authenticated;
+
 -- Row locks and the partial unique index make cancellation and rebooking safe.
 create or replace function public.member4_change_booking_status(
   p_booking_id uuid, p_status text, p_reason text default null
@@ -129,6 +146,9 @@ begin
   select * into b from public.bookings where id = p_booking_id for update;
   if not found then raise exception 'Booking not found' using errcode = 'P0002'; end if;
   if b.status <> 'confirmed' then raise exception 'Only confirmed bookings can change status' using errcode = '22023'; end if;
+  if length(coalesce(p_reason, '')) > 500 then
+    raise exception 'Cancellation note is too long' using errcode = '22023';
+  end if;
   select * into slot_row from public.availability_slots where id = b.slot_id for update;
   if p_status = 'cancelled' then
     if actor not in (b.customer_id, b.provider_id) and not public.is_admin() then
@@ -204,6 +224,9 @@ begin
   if not public.is_admin() then raise exception 'Admin access required' using errcode = '42501'; end if;
   if p_status not in ('open', 'in_progress', 'resolved') then
     raise exception 'Invalid support status' using errcode = '22023';
+  end if;
+  if length(coalesce(p_admin_note, '')) > 2000 then
+    raise exception 'Support response is too long' using errcode = '22023';
   end if;
   update public.support_requests set status = p_status,
     admin_note = nullif(trim(coalesce(p_admin_note, '')), ''), updated_at = now()

@@ -14,6 +14,7 @@ export type Member4Review = {
   id: string; booking_id: string; customer_id: string; provider_id: string
   rating: number; comment: string; created_at: string; updated_at: string
 }
+export type Member4PublicReview = Pick<Member4Review, 'id' | 'provider_id' | 'rating' | 'comment' | 'created_at' | 'updated_at'>
 export type Member4SupportStatus = 'open' | 'in_progress' | 'resolved'
 export type Member4SupportRequest = {
   id: string; user_id: string; subject: string; message: string

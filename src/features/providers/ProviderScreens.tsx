@@ -33,12 +33,13 @@ export function ProviderDashboardScreen({ profile, onNavigate }: { profile: AppP
             <div><Wallet size={18}/><small>Direct Earnings</small><strong>—</strong></div>
             <div><Star size={18}/><small>Your Rating</small><strong>{provider.rating_count ? provider.rating_avg.toFixed(1) : 'New'}</strong></div></div>
           <div className="m1-section-title"><h2>Direct Bookings</h2><small>Today</small></div>
-          <StatusMessage>New bookings appear in Notifications. Booking status and history are managed in the Member 4 flow.</StatusMessage>
+          <button className="member4-support-link" onClick={() => onNavigate('bookings')}><CalendarDays size={18}/> View bookings and history <ArrowRight size={16}/></button>
           <div className="m1-section-title"><h2>Service Profile</h2></div>
           <div className="m1-simple-card"><strong>{provider.category}</strong><span><MapPin size={14}/> {provider.location}</span>
             <span>Starting from {formatLkr(provider.base_price_lkr)}</span><button onClick={() => onNavigate('provider-register')}>Edit details <ArrowRight size={15}/></button></div>
           <div className="member3-provider-actions"><button onClick={() => onNavigate('member3-services')}><strong>My services</strong><small>Add services, prices and durations</small><ArrowRight size={17}/></button>
-            <button onClick={() => onNavigate('member3-availability')}><strong>Availability calendar</strong><small>Add and edit open appointment times</small><CalendarDays size={17}/></button></div></>}
+            <button onClick={() => onNavigate('member3-availability')}><strong>Availability calendar</strong><small>Add and edit open appointment times</small><CalendarDays size={17}/></button>
+            <button onClick={() => onNavigate('member4-support')}><strong>Help & Support</strong><small>Send and track support requests</small><ArrowRight size={17}/></button></div></>}
     </main><BottomNav kind="provider" current="provider" onNavigate={onNavigate}/></div>
 }
 

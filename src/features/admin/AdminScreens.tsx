@@ -28,7 +28,9 @@ export function AdminDashboardScreen({ profile, onNavigate }: { profile: AppProf
       {approved.length ? <div className="m1-provider-list">{approved.slice(0, 3).map(provider => <div className="m1-admin-provider-row" key={provider.user_id}>
         <span className="m1-mini-avatar">{(provider.display_name || '').slice(0, 1)}</span><span><strong>{provider.display_name}</strong><small>{provider.category} · {provider.location}</small></span><BadgeCheck size={18}/></div>)}</div>
         : <StatusMessage>No providers have been approved yet.</StatusMessage>}
-      <div className="member3-provider-actions"><button onClick={() => onNavigate('member3-categories')}><strong>Manage service categories</strong><small>Add, edit or hide customer categories</small><ArrowRight size={17}/></button></div>
+      <div className="member3-provider-actions"><button onClick={() => onNavigate('member3-categories')}><strong>Manage service categories</strong><small>Add, edit or hide customer categories</small><ArrowRight size={17}/></button>
+        <button onClick={() => onNavigate('bookings')}><strong>All bookings</strong><small>View appointment status and history</small><ArrowRight size={17}/></button>
+        <button onClick={() => onNavigate('member4-support')}><strong>Support queue</strong><small>Review requests and send responses</small><ArrowRight size={17}/></button></div>
       <div className="m1-assurance"><ShieldCheck size={19}/><span><strong>Safety comes first</strong><small>Review each document before approval.</small></span></div>
     </>}</main><BottomNav kind="admin" current="admin" onNavigate={onNavigate}/></div>
 }

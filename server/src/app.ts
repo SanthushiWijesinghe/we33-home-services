@@ -11,6 +11,9 @@ import { member3ServiceRoutes } from './modules/services/member3.services.routes
 import { member3AvailabilityRoutes } from './modules/availability/member3.availability.routes.js'
 import { member3BookingCreateRoutes } from './modules/bookings/member3.booking-create.routes.js'
 import { member3NotificationRoutes } from './modules/notifications/member3.notifications.routes.js'
+import { member4BookingManagementRoutes } from './modules/bookings/member4.booking-management.routes.js'
+import { member4ReviewRoutes } from './modules/reviews/member4.reviews.routes.js'
+import { member4SupportRoutes } from './modules/support/member4.support.routes.js'
 
 export const app = express()
 app.disable('x-powered-by')
@@ -28,7 +31,10 @@ app.use('/api/categories', member3CategoryRoutes)
 app.use('/api/services', member3ServiceRoutes)
 app.use('/api/availability', member3AvailabilityRoutes)
 app.use('/api/bookings', member3BookingCreateRoutes)
+app.use('/api/bookings', member4BookingManagementRoutes)
 app.use('/api/notifications', member3NotificationRoutes)
+app.use('/api/reviews', member4ReviewRoutes)
+app.use('/api/support', member4SupportRoutes)
 
 app.use(notFound)
 app.use(errorHandler)

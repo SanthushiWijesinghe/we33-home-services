@@ -1,5 +1,5 @@
 import { requireSupabase } from '../../services/supabase/client'
-import type { Member4Booking, Member4BookingEvent, Member4BookingStatus, Member4Review, Member4SupportRequest, Member4SupportStatus } from './member4.types'
+import type { Member4Booking, Member4BookingEvent, Member4BookingStatus, Member4PublicReview, Member4Review, Member4SupportRequest, Member4SupportStatus } from './member4.types'
 
 export function member4Error(cause: unknown, fallback: string): string {
   const message = cause && typeof cause === 'object' && 'message' in cause && typeof cause.message === 'string'
@@ -30,11 +30,10 @@ export async function getMember4BookingReview(bookingId: string): Promise<Member
   if (error) throw error
   return data as Member4Review | null
 }
-export async function listMember4ProviderReviews(providerId: string): Promise<Member4Review[]> {
-  const { data, error } = await requireSupabase().from('provider_reviews').select('*')
-    .eq('provider_id', providerId).order('created_at', { ascending: false }).limit(100)
+export async function listMember4ProviderReviews(providerId: string): Promise<Member4PublicReview[]> {
+  const { data, error } = await requireSupabase().rpc('member4_list_provider_reviews', { p_provider_id: providerId })
   if (error) throw error
-  return data as Member4Review[]
+  return data as Member4PublicReview[]
 }
 export async function saveMember4Review(bookingId: string, rating: number, comment: string): Promise<Member4Review> {
   const { data, error } = await requireSupabase().rpc('member4_save_review', {
