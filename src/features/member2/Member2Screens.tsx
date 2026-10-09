@@ -4,6 +4,7 @@ import { BottomNav, PrimaryButton, ScreenHeader, StatusMessage } from '../../sha
 import type { AppProfile } from '../auth/AuthProvider'
 import type { ProviderProfile } from '../providers/provider.types'
 import { getCustomerProfilePhoto, uploadCustomerProfilePhoto } from './member2.service'
+import { Member2CardFields, emptyDemoCard, maskedDemoCard } from './Member2CardFields'
 import { deleteCustomerAddress, deletePaymentMethod, listCustomerAddresses, listCustomerFeedback, listPaymentMethods, saveCustomerAddress, savePaymentMethod, submitCustomerFeedback, updateCustomerProfile, type CustomerAddress, type CustomerFeedback, type PaymentMethod } from './member2.service'
 const categories = ['All', 'Electrical', 'Plumbing', 'Cleaning', 'AC Repair', 'Painting', 'Carpentry']
 
@@ -173,6 +174,8 @@ export function Member2PaymentScreen({ profile, onBack }: { profile: AppProfile;
   const [items, setItems] = useState<PaymentMethod[]>([])
   const [method, setMethod] = useState<PaymentMethod['method_type']>('cash')
   const [error, setError] = useState('')
+  const [card, setCard] = useState(emptyDemoCard)
+  const [adding, setAdding] = useState(false)
 
   async function refresh() {
     try {
@@ -187,18 +190,22 @@ export function Member2PaymentScreen({ profile, onBack }: { profile: AppProfile;
   useEffect(() => { void refresh() }, [profile.id])
 
   async function add() {
+    setAdding(true); setError('')
     try {
+      const metadata = method === 'card' ? maskedDemoCard(card) : { label: method === 'cash' ? 'Cash on completion' : 'Mobile payment', last_four: null }
       const savedMethod = await savePaymentMethod(profile.id, {
         method_type: method,
-        label: method === 'cash' ? 'Cash on completion' : method === 'card' ? 'Saved card' : 'Mobile payment',
-        last_four: null,
+        label: metadata.label,
+        last_four: metadata.last_four,
         is_default: items.length === 0,
       })
       setItems(previous => [savedMethod, ...previous])
+      setCard(emptyDemoCard)
       setError('')
     } catch (cause) {
       setError(member2ErrorMessage(cause, 'Unable to save payment option.'))
     }
+    finally { setAdding(false) }
   }
 
   async function remove(methodId: string) {
@@ -214,17 +221,18 @@ export function Member2PaymentScreen({ profile, onBack }: { profile: AppProfile;
   return <div className="m1-page">
     <ScreenHeader title="Payment Options" onBack={onBack}/>
     <main className="m1-scroll member2-screen">
-      <div className="member2-safe-banner"><CreditCard/> Payment details are protected. Full card numbers are never stored.</div>
-      <section className="member2-card member2-form">
+      <div className="member2-safe-banner"><CreditCard/> Demo payment preferences. Card numbers and security codes are never saved.</div>
+      <form className="member2-card member2-form" onSubmit={event => { event.preventDefault(); void add() }}>
         <label>Payment method
-          <select value={method} onChange={event => setMethod(event.target.value as PaymentMethod['method_type'])}>
+          <select value={method} disabled={adding} onChange={event => { setMethod(event.target.value as PaymentMethod['method_type']); setCard(emptyDemoCard) }}>
             <option value="cash">Cash on completion</option>
-            <option value="card">Card (metadata only)</option>
+            <option value="card">Card — demo details</option>
             <option value="mobile">Mobile payment</option>
           </select>
         </label>
-        <PrimaryButton onClick={() => void add()}><Plus size={16}/> Add payment option</PrimaryButton>
-      </section>
+        {method === 'card' && <Member2CardFields value={card} onChange={setCard} disabled={adding}/>}
+        <PrimaryButton type="submit" disabled={adding}><Plus size={16}/> {adding ? 'Saving…' : 'Add payment option'}</PrimaryButton>
+      </form>
       {error && <StatusMessage kind="error">{error}</StatusMessage>}
       {items.map(item => <div className="member2-list-row" key={item.id}>
         <CreditCard size={19}/>

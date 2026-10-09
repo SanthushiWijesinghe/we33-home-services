@@ -11,6 +11,7 @@ import {
   updateMember3Slot,
 } from './member3.service'
 import type { Member3Booking, Member3Category, Member3Notification, Member3Service, Member3ServiceInput, Member3Slot } from './member3.types'
+import { Member4DemoCheckout } from '../member4/Member4DemoCheckout'
 
 const dateTime = (value: string) => new Intl.DateTimeFormat('en-LK', {
   day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit',
@@ -323,9 +324,10 @@ export function Member3AvailabilityScreen({ profile, onBack, onNavigate }: {
     </main><BottomNav kind="provider" current="provider" onNavigate={onNavigate}/></div>
 }
 
-export function Member3BookingScreen({ provider, service, onBack, onNavigate }: {
+export function Member3BookingScreen({ provider, service, onBack, onNavigate, onOpenBooking }: {
   provider: ProviderProfile; service: Member3Service; onBack: () => void
   onNavigate: (screen: string) => void
+  onOpenBooking?: (bookingId: string) => void
 }) {
   const [slots, setSlots] = useState<Member3Slot[]>([])
   const [slotId, setSlotId] = useState('')
@@ -366,7 +368,10 @@ export function Member3BookingScreen({ provider, service, onBack, onNavigate }: 
           <span>{dateTime(slots.find(slot => slot.id === booking.slot_id)?.start_at ?? new Date().toISOString())}</span>
           <span>{booking.address_text}</span><strong>{formatLkr(booking.price_lkr)}</strong></div>
         <PrimaryButton onClick={() => onNavigate('notifications')}><Bell size={17}/> View notifications</PrimaryButton>
-        <button className="member3-outline" onClick={() => onNavigate('bookings')}>View my booking</button>
+        <Member4DemoCheckout booking={booking} userId={booking.customer_id}/>
+        <button className="member3-outline" onClick={() => onOpenBooking ? onOpenBooking(booking.id) : onNavigate('bookings')}>Payment and write a review</button>
+        <button className="member3-outline" onClick={() => onNavigate('payments')}>Payment options</button>
+        <button className="member3-outline" onClick={() => onNavigate('reviews')}>Customer reviews</button>
         <button className="member3-outline" onClick={onBack}>Back to services</button>
       </div> : <>
         <div className="member3-intro"><span>BOOK A VERIFIED PRO</span><h1>{service.title}</h1>

@@ -36,6 +36,7 @@ function MemberOneContent() {
   const [selectedProvider, setSelectedProvider] = useState<ProviderProfile | null>(null)
   const [selectedService, setSelectedService] = useState<Member3Service | null>(null)
   const [notificationReturn, setNotificationReturn] = useState<Screen>('home')
+  const [bookingIdToOpen, setBookingIdToOpen] = useState<string | null>(null)
 
   useEffect(() => { const timer = window.setTimeout(() => setReady(true), 900); return () => window.clearTimeout(timer) }, [])
   useEffect(() => {
@@ -58,6 +59,7 @@ function MemberOneContent() {
   }, [auth.profile?.id, auth.profile?.role])
 
   function navigate(target: string) {
+    if (target === 'bookings') setBookingIdToOpen(null)
     if (target === 'notifications') setNotificationReturn(screen)
     setScreen(target as Screen); window.scrollTo(0, 0)
   }
@@ -109,7 +111,7 @@ function MemberOneContent() {
   else if (screen === 'member3-provider-services' && auth.profile.role === 'CUSTOMER' && selectedProvider) content = <Member3CustomerServicesScreen
     provider={selectedProvider} onBack={back} onService={selectService} onNavigate={navigate}/>
   else if (screen === 'member3-booking' && auth.profile.role === 'CUSTOMER' && selectedProvider && selectedService) content = <Member3BookingScreen
-    provider={selectedProvider} service={selectedService} onBack={back} onNavigate={navigate}/>
+    provider={selectedProvider} service={selectedService} onBack={back} onNavigate={navigate} onOpenBooking={id => { navigate('bookings'); setBookingIdToOpen(id) }}/>
   else if (screen === 'member4-provider-reviews' && auth.profile.role === 'CUSTOMER' && selectedProvider) content = <Member4ProviderReviewsScreen
     providerId={selectedProvider.user_id} providerName={selectedProvider.display_name} onBack={back}/>
   else if (screen === 'provider' && auth.profile.role === 'SERVICE_PROVIDER') content = <ProviderDashboardScreen profile={auth.profile} onNavigate={navigate}/>
@@ -123,7 +125,7 @@ function MemberOneContent() {
   else if (screen === 'verification' && auth.profile.role === 'ADMIN') content = <AdminVerificationScreen onNavigate={navigate}/>
   else if (screen === 'notifications') content = <Member3NotificationsScreen profile={auth.profile} onBack={back} onNavigate={navigate}/>
   else if (screen === 'member4-support') content = <Member4SupportScreen profile={auth.profile} onBack={back} onNavigate={navigate}/>
-  else if (screen === 'bookings') content = <Member4BookingsScreen profile={auth.profile} onBack={back} onNavigate={navigate}/>
+  else if (screen === 'bookings') content = <Member4BookingsScreen profile={auth.profile} onBack={back} onNavigate={navigate} initialBookingId={bookingIdToOpen}/>
   else if (screen === 'member2-filters' && auth.profile.role === 'CUSTOMER') content = <Member2ServiceFiltersScreen providers={providers} initialCategory={searchCategory} onProvider={selectProvider} onBack={back} onNavigate={navigate}/>
   else if (screen === 'profile' && auth.profile.role === 'CUSTOMER') content = <Member2ProfileScreen profile={auth.profile} onBack={back} onNavigate={navigate} onProfileUpdated={() => { void auth.refreshProfile() }} onSignOut={() => void auth.signOut()}/>
   else if (screen === 'location' && auth.profile.role === 'CUSTOMER') content = <Member2LocationScreen profile={auth.profile} onBack={back}/>
