@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState, type FormEvent, type ChangeEvent } from 'react'
-import { Camera, CalendarDays, ChevronRight, CreditCard, Heart, LogOut, MapPin, Plus, Save, Search, Star, Trash2, Wallet } from 'lucide-react'
+import { Camera, CalendarDays, ChevronRight, CreditCard, Heart, LogOut, MapPin, Pencil, Plus, Save, Search, Star, Trash2, Wallet } from 'lucide-react'
 import { BottomNav, PrimaryButton, ScreenHeader, StatusMessage } from '../../shared/components/MobileUi'
 import type { AppProfile } from '../auth/AuthProvider'
 import type { ProviderProfile } from '../providers/provider.types'
 import { getCustomerProfilePhoto, uploadCustomerProfilePhoto } from './member2.service'
+import { Member2CardFields, emptyDemoCard, maskedDemoCard } from './Member2CardFields'
 import { deleteCustomerAddress, deletePaymentMethod, listCustomerAddresses, listCustomerFeedback, listPaymentMethods, saveCustomerAddress, savePaymentMethod, submitCustomerFeedback, updateCustomerProfile, type CustomerAddress, type CustomerFeedback, type PaymentMethod } from './member2.service'
 const categories = ['All', 'Electrical', 'Plumbing', 'Cleaning', 'AC Repair', 'Painting', 'Carpentry']
 
@@ -81,7 +82,7 @@ export function Member2ProfileScreen({ profile, onBack, onNavigate, onProfileUpd
       <form className="member2-card member2-form" onSubmit={save}>
         <label>Full name<input required minLength={2} value={name} onChange={e => setName(e.target.value)}/></label>
         <label>Email status<input value="Signed-in account" disabled/></label>
-        <label>Phone number<input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+94 77 123 4567"/></label>
+        <label>Phone number<input type="tel" inputMode="tel" maxLength={20} value={phone} onChange={e => setPhone(e.target.value)} placeholder="077 123 4567 or +94 77 123 4567"/><small>Use a Sri Lankan number with 10 digits or +94 followed by 9 digits.</small></label>
         {status && <StatusMessage kind={status.includes('successfully') ? 'success' : 'error'}>{status}</StatusMessage>}
         <PrimaryButton type="submit" disabled={saving}><Save size={16}/> {saving ? 'Saving…' : 'Save changes'}</PrimaryButton>
       </form>
@@ -109,6 +110,8 @@ export function Member2ProfileScreen({ profile, onBack, onNavigate, onProfileUpd
 export function Member2LocationScreen({ profile, onBack }: { profile: AppProfile; onBack: () => void }) {
   const [items, setItems] = useState<CustomerAddress[]>([])
   const [address, setAddress] = useState('')
+  const [editing, setEditing] = useState<CustomerAddress | null>(null)
+  const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
   async function refresh() {
@@ -125,18 +128,22 @@ export function Member2LocationScreen({ profile, onBack }: { profile: AppProfile
 
   async function add(event: FormEvent) {
     event.preventDefault()
+    if (saving) return
+    setSaving(true)
     try {
+      if (!address.trim()) throw new Error('Enter a service address.')
       const savedAddress = await saveCustomerAddress(profile.id, {
-        label: 'Home',
+        label: editing?.label || 'Home',
         address_line: address.trim(),
-        is_default: items.length === 0,
-      })
-      setItems(previous => [savedAddress, ...previous])
+        is_default: editing ? editing.is_default : items.length === 0,
+      }, editing?.id)
+      setItems(previous => editing ? previous.map(item => item.id === savedAddress.id ? savedAddress : item) : [savedAddress, ...previous])
+      setEditing(null)
       setAddress('')
       setError('')
     } catch (cause) {
       setError(member2ErrorMessage(cause, 'Unable to save location.'))
-    }
+    } finally { setSaving(false) }
   }
 
   async function remove(addressId: string) {
@@ -153,17 +160,19 @@ export function Member2LocationScreen({ profile, onBack }: { profile: AppProfile
     <ScreenHeader title="Location Settings" onBack={onBack}/>
     <main className="m1-scroll member2-screen">
       <section className="member2-card">
-        <h2><MapPin size={17}/> Add saved address</h2>
+        <h2><MapPin size={17}/> {editing ? 'Edit saved address' : 'Add saved address'}</h2>
         <form className="member2-form" onSubmit={add}>
           <label>Address<input value={address} onChange={event => setAddress(event.target.value)} placeholder="No. 12, Colombo 03" required/></label>
-          <PrimaryButton type="submit"><Plus size={16}/> Save location</PrimaryButton>
+          <PrimaryButton type="submit" disabled={saving}><Save size={16}/> {saving ? 'Saving…' : editing ? 'Save address changes' : 'Save location'}</PrimaryButton>
+          {editing && <button type="button" className="m1-secondary-btn" disabled={saving} onClick={() => { setEditing(null); setAddress(''); setError('') }}>Cancel editing</button>}
         </form>
       </section>
       {error && <StatusMessage kind="error">{error}</StatusMessage>}
       {items.map(item => <div className="member2-list-row" key={item.id}>
         <MapPin size={19}/>
         <span><strong>{item.label}</strong><small>{item.address_line}</small></span>
-        <button onClick={() => void remove(item.id)} aria-label="Delete address"><Trash2 size={16}/></button>
+        <button disabled={saving} onClick={() => { setEditing(item); setAddress(item.address_line); setError(''); document.querySelector('.member2-screen')?.scrollTo({ top: 0, behavior: 'smooth' }) }} aria-label="Edit address"><Pencil size={16}/></button>
+        <button disabled={saving || editing?.id === item.id} onClick={() => void remove(item.id)} aria-label="Delete address"><Trash2 size={16}/></button>
       </div>)}
     </main>
   </div>
@@ -173,6 +182,9 @@ export function Member2PaymentScreen({ profile, onBack }: { profile: AppProfile;
   const [items, setItems] = useState<PaymentMethod[]>([])
   const [method, setMethod] = useState<PaymentMethod['method_type']>('cash')
   const [error, setError] = useState('')
+  const [card, setCard] = useState(emptyDemoCard)
+  const [adding, setAdding] = useState(false)
+  const [editing, setEditing] = useState<PaymentMethod | null>(null)
 
   async function refresh() {
     try {
@@ -187,18 +199,24 @@ export function Member2PaymentScreen({ profile, onBack }: { profile: AppProfile;
   useEffect(() => { void refresh() }, [profile.id])
 
   async function add() {
+    if (adding) return
+    setAdding(true); setError('')
     try {
+      const metadata = method === 'card' ? maskedDemoCard(card) : { label: method === 'cash' ? 'Cash on completion' : 'Mobile payment', last_four: null }
       const savedMethod = await savePaymentMethod(profile.id, {
         method_type: method,
-        label: method === 'cash' ? 'Cash on completion' : method === 'card' ? 'Saved card' : 'Mobile payment',
-        last_four: null,
-        is_default: items.length === 0,
-      })
-      setItems(previous => [savedMethod, ...previous])
+        label: metadata.label,
+        last_four: metadata.last_four,
+        is_default: editing ? editing.is_default : items.length === 0,
+      }, editing?.id)
+      setItems(previous => editing ? previous.map(item => item.id === savedMethod.id ? savedMethod : item) : [savedMethod, ...previous])
+      setEditing(null)
+      setCard(emptyDemoCard)
       setError('')
     } catch (cause) {
       setError(member2ErrorMessage(cause, 'Unable to save payment option.'))
     }
+    finally { setAdding(false) }
   }
 
   async function remove(methodId: string) {
@@ -214,22 +232,27 @@ export function Member2PaymentScreen({ profile, onBack }: { profile: AppProfile;
   return <div className="m1-page">
     <ScreenHeader title="Payment Options" onBack={onBack}/>
     <main className="m1-scroll member2-screen">
-      <div className="member2-safe-banner"><CreditCard/> Payment details are protected. Full card numbers are never stored.</div>
-      <section className="member2-card member2-form">
+      <div className="member2-safe-banner"><CreditCard/> Demo payment preferences. Card numbers and security codes are never saved.</div>
+      <form className="member2-card member2-form" onSubmit={event => { event.preventDefault(); void add() }}>
         <label>Payment method
-          <select value={method} onChange={event => setMethod(event.target.value as PaymentMethod['method_type'])}>
+          <select value={method} disabled={adding} onChange={event => { setMethod(event.target.value as PaymentMethod['method_type']); setCard(emptyDemoCard) }}>
             <option value="cash">Cash on completion</option>
-            <option value="card">Card (metadata only)</option>
+            <option value="card">Card — demo details</option>
             <option value="mobile">Mobile payment</option>
           </select>
         </label>
-        <PrimaryButton onClick={() => void add()}><Plus size={16}/> Add payment option</PrimaryButton>
-      </section>
+        {editing && <h2>Edit payment option</h2>}
+        {editing?.method_type === 'card' && <p>Saved card ends in {editing.last_four}. Enter the replacement demo card details below.</p>}
+        {method === 'card' && <Member2CardFields value={card} onChange={setCard} disabled={adding}/>}
+        <PrimaryButton type="submit" disabled={adding}><Plus size={16}/> {adding ? 'Saving…' : editing ? 'Save payment changes' : 'Add payment option'}</PrimaryButton>
+        {editing && <button type="button" className="m1-secondary-btn" disabled={adding} onClick={() => { setEditing(null); setMethod('cash'); setCard(emptyDemoCard); setError('') }}>Cancel editing</button>}
+      </form>
       {error && <StatusMessage kind="error">{error}</StatusMessage>}
       {items.map(item => <div className="member2-list-row" key={item.id}>
         <CreditCard size={19}/>
         <span><strong>{item.label}</strong><small>{item.is_default ? 'Default method' : 'Available at checkout'}</small></span>
-        <button onClick={() => void remove(item.id)} aria-label="Delete payment method"><Trash2 size={16}/></button>
+        <button disabled={adding} onClick={() => { setEditing(item); setMethod(item.method_type); setCard(emptyDemoCard); setError(''); document.querySelector('.member2-screen')?.scrollTo({ top: 0, behavior: 'smooth' }) }} aria-label="Edit payment method"><Pencil size={16}/></button>
+        <button disabled={adding || editing?.id === item.id} onClick={() => void remove(item.id)} aria-label="Delete payment method"><Trash2 size={16}/></button>
       </div>)}
     </main>
   </div>

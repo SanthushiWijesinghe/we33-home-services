@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { CalendarDays, ChevronRight, CircleHelp, Clock3, MapPin, MessageCircle, Star } from 'lucide-react'
 import { BottomNav, PrimaryButton, ScreenHeader, StatusMessage, formatLkr } from '../../shared/components/MobileUi'
+import { Member4DemoCheckout } from './Member4DemoCheckout'
 import type { AppProfile } from '../auth/AuthProvider'
 import {
   changeMember4BookingStatus, createMember4SupportRequest, deleteMember4Review, getMember4BookingReview,
@@ -14,11 +15,11 @@ const dateTime = (value: string) => new Intl.DateTimeFormat('en-LK', {
 }).format(new Date(value))
 const navKind = (profile: AppProfile) => profile.role === 'ADMIN' ? 'admin' : profile.role === 'SERVICE_PROVIDER' ? 'provider' : 'customer'
 
-export function Member4BookingsScreen({ profile, onBack, onNavigate }: {
-  profile: AppProfile; onBack: () => void; onNavigate: (screen: string) => void
+export function Member4BookingsScreen({ profile, onBack, onNavigate, initialBookingId }: {
+  profile: AppProfile; onBack: () => void; onNavigate: (screen: string) => void; initialBookingId?: string | null
 }) {
   const [items, setItems] = useState<Member4Booking[]>([])
-  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [selectedId, setSelectedId] = useState<string | null>(initialBookingId ?? null)
   const [history, setHistory] = useState(false)
   const [events, setEvents] = useState<Member4BookingEvent[]>([])
   const [review, setReview] = useState<Member4Review | null>(null)
@@ -106,6 +107,12 @@ export function Member4BookingsScreen({ profile, onBack, onNavigate }: {
           <span>{profile.role === 'SERVICE_PROVIDER' ? `Customer: ${booking.customer_name}` : `Provider: ${booking.provider_name}`}</span>
           <strong>{formatLkr(booking.price_lkr)}</strong>
           {booking.cancellation_reason && <p>Cancellation note: {booking.cancellation_reason}</p>}</div>
+        {profile.role === 'CUSTOMER' && <div className="member4-detail-card">
+          <h2>Reviews and payment</h2>
+          <button className="member4-outline" onClick={() => onNavigate('reviews')}>Read customer reviews</button>
+          {booking.status !== 'cancelled' && <button className="member4-outline" onClick={() => onNavigate('payments')}>Payment options</button>}
+          {booking.status === 'confirmed' && <p>Your review form and demo checkout are available below.</p>}
+        </div>}
         {booking.status === 'confirmed' && new Date(booking.start_at) > new Date() &&
           <div className="member4-detail-card"><h2>Need to cancel?</h2><p>The time returns to the provider's calendar.</p>
             <label>Reason (optional)<textarea maxLength={500} rows={2} value={reason} onChange={event => setReason(event.target.value)}/></label>
@@ -115,12 +122,13 @@ export function Member4BookingsScreen({ profile, onBack, onNavigate }: {
           <PrimaryButton disabled={busy} onClick={() => void changeStatus('completed')}>Mark completed</PrimaryButton>}
         <div className="member4-detail-card"><h2>Activity</h2><span><Clock3 size={17}/>Confirmed {dateTime(booking.created_at)}</span>
           {events.map(item => <span key={item.id}><Clock3 size={17}/>{item.to_status} {dateTime(item.created_at)}{item.note ? ` · ${item.note}` : ''}</span>)}</div>
-        {booking.status === 'completed' && profile.role === 'CUSTOMER' && <form className="member4-detail-card" onSubmit={submitReview}>
+        {profile.role === 'CUSTOMER' && <Member4DemoCheckout key={booking.id} booking={booking} userId={profile.id}/>}
+        {booking.status !== 'cancelled' && profile.role === 'CUSTOMER' && <form className="member4-detail-card" onSubmit={submitReview}>
           <h2>{review ? 'Edit your review' : 'Rate this provider'}</h2>
           <label>Stars<select value={rating} onChange={event => setRating(Number(event.target.value))}>
             {[5, 4, 3, 2, 1].map(value => <option key={value} value={value}>{value} star{value === 1 ? '' : 's'}</option>)}</select></label>
           <label>Your review<textarea required minLength={10} maxLength={1000} rows={4} value={comment}
-            onChange={event => setComment(event.target.value)} placeholder="How did the service go?"/></label>
+            onChange={event => setComment(event.target.value)} placeholder="Share your booking or service experience"/></label>
           <PrimaryButton type="submit" disabled={busy}>{review ? 'Update review' : 'Submit review'}</PrimaryButton>
           {review && <button type="button" className="member4-danger" disabled={busy} onClick={() => void removeReview()}>Delete review</button>}
         </form>}
@@ -140,12 +148,12 @@ export function Member4ProviderReviewsScreen({ providerId, providerName, onBack 
     .catch(cause => { if (active) setError(member4Error(cause, 'Unable to load reviews.')) })
     .finally(() => { if (active) setLoading(false) }); return () => { active = false } }, [providerId])
   return <div className="m1-page"><ScreenHeader title="Provider Reviews" onBack={onBack}/><main className="m1-scroll member4-screen">
-    <div className="member4-intro"><span>VERIFIED BOOKINGS</span><h1>{providerName}</h1><p>Reviews from completed appointments.</p></div>
+    <div className="member4-intro"><span>VERIFIED BOOKINGS</span><h1>{providerName}</h1><p>Reviews from customers who booked this provider.</p></div>
     {error && <StatusMessage kind="error">{error}</StatusMessage>}
     {loading ? <StatusMessage>Loading reviews…</StatusMessage> : reviews.length ? reviews.map(review =>
       <article className="member4-detail-card" key={review.id}><strong>{'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}</strong>
         <p>{review.comment}</p><small>{dateTime(review.created_at)}</small></article>)
-      : !error && <div className="member4-empty"><Star size={28}/><strong>No reviews yet</strong><p>Completed booking reviews will appear here.</p></div>}
+      : !error && <div className="member4-empty"><Star size={28}/><strong>No reviews yet</strong><p>Customer booking reviews will appear here.</p></div>}
   </main></div>
 }
 

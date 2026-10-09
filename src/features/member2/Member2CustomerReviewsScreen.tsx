@@ -42,9 +42,9 @@ export function Member2CustomerReviewsScreen({ onBack, onNavigate }: {
             <div><strong>{review.reviewer_name}</strong><small>{new Intl.DateTimeFormat('en-LK', { dateStyle: 'medium' }).format(new Date(review.created_at))}</small></div>
             <span className="member2-review-stars" aria-label={`${review.rating} out of 5 stars`}>{[1, 2, 3, 4, 5].map(value => <Star key={value} size={14} fill={value <= review.rating ? 'currentColor' : 'none'}/>)}</span></div>
           <small className="member2-review-provider">Service by {review.provider_name}</small><p>{review.comment}</p>
-        </article>) : <section className="member2-card"><h2>No reviews yet</h2><p>Reviews from completed appointments will appear here.</p></section>}
+        </article>) : <section className="member2-card"><h2>No reviews yet</h2><p>Customer booking reviews will appear here.</p></section>}
       </>}
-      <div className="member2-review-write"><p>Open a completed booking to rate your provider.</p>
+      <div className="member2-review-write"><p>Open an active or completed booking to rate your provider.</p>
         <PrimaryButton onClick={() => onNavigate('bookings')}><Pencil size={17}/> Write a Review</PrimaryButton></div>
     </main><BottomNav kind="customer" current="profile" onNavigate={onNavigate}/></div>
 }

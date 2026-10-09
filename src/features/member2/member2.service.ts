@@ -37,12 +37,29 @@ export async function uploadCustomerProfilePhoto(userId: string, file: File, old
 export type CustomerAddress = { id: string; label: string; address_line: string; is_default: boolean }
 export type PaymentMethod = { id: string; method_type: 'cash' | 'card' | 'mobile'; label: string; last_four: string | null; is_default: boolean }
 export type CustomerFeedback = { id: string; category: string; message: string; status: string; created_at: string }
-export async function updateCustomerProfile(userId: string, fullName: string, phone: string) { const { data, error } = await requireSupabase().from('profiles').update({ full_name: fullName.trim(), phone: phone.trim() }).eq('id', userId).select('id, full_name, role, phone').single(); if (error) throw error; return data }
+// Member 2: validate before any profile request; blank phone remains optional.
+export function normalizeCustomerPhone(value: string): string {
+  const phone = value.trim()
+  if (!phone) return ''
+  if (!/^[+0-9 ()-]+$/.test(phone)) throw new Error('Phone number cannot contain letters or other symbols.')
+  const compact = phone.replace(/[ ()-]/g, '')
+  if (/^0[1-9][0-9]{8}$/.test(compact)) return '+94' + compact.slice(1)
+  if (/^\+94[1-9][0-9]{8}$/.test(compact)) return compact
+  throw new Error('Enter a valid Sri Lankan phone number, such as 0771234567 or +94771234567.')
+}
+export async function updateCustomerProfile(userId: string, fullName: string, phone: string) { const { data, error } = await requireSupabase().from('profiles').update({ full_name: fullName.trim(), phone: normalizeCustomerPhone(phone) }).eq('id', userId).select('id, full_name, role, phone').single(); if (error) throw error; return data }
 export async function listCustomerAddresses(userId: string) { const { data, error } = await requireSupabase().from('customer_addresses').select('*').eq('user_id', userId).order('is_default', { ascending: false }); if (error) throw error; return data as CustomerAddress[] }
 export async function saveCustomerAddress(userId: string, address: Omit<CustomerAddress, 'id'>, id?: string) { const c = requireSupabase(); const result = id ? await c.from('customer_addresses').update(address).eq('id', id).eq('user_id', userId).select('*').single() : await c.from('customer_addresses').insert({ user_id: userId, ...address }).select('*').single(); if (result.error) throw result.error; return result.data as CustomerAddress }
 export async function deleteCustomerAddress(userId: string, id: string) { const { error } = await requireSupabase().from('customer_addresses').delete().eq('id', id).eq('user_id', userId); if (error) throw error }
 export async function listPaymentMethods(userId: string) { const { data, error } = await requireSupabase().from('customer_payment_methods').select('*').eq('user_id', userId).order('is_default', { ascending: false }); if (error) throw error; return data as PaymentMethod[] }
-export async function savePaymentMethod(userId: string, method: Omit<PaymentMethod, 'id'>) { const { data, error } = await requireSupabase().from('customer_payment_methods').insert({ user_id: userId, ...method }).select('*').single(); if (error) throw error; return data as PaymentMethod }
+export async function savePaymentMethod(userId: string, method: Omit<PaymentMethod, 'id'>, id?: string) {
+  const client = requireSupabase()
+  const result = id
+    ? await client.from('customer_payment_methods').update(method).eq('id', id).eq('user_id', userId).select('*').single()
+    : await client.from('customer_payment_methods').insert({ user_id: userId, ...method }).select('*').single()
+  if (result.error) throw result.error
+  return result.data as PaymentMethod
+}
 export async function deletePaymentMethod(userId: string, id: string) { const { error } = await requireSupabase().from('customer_payment_methods').delete().eq('id', id).eq('user_id', userId); if (error) throw error }
 export async function submitCustomerFeedback(userId: string, category: string, message: string) { const { data, error } = await requireSupabase().from('customer_feedback').insert({ user_id: userId, category, message: message.trim() }).select('*').single(); if (error) throw error; return data as CustomerFeedback }
 export async function listCustomerFeedback(userId: string) { const { data, error } = await requireSupabase().from('customer_feedback').select('*').eq('user_id', userId).order('created_at', { ascending: false }); if (error) throw error; return data as CustomerFeedback[] }
