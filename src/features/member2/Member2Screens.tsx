@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react'
-import { CalendarDays, ChevronRight, CreditCard, Heart, LogOut, MapPin, Plus, Save, Search, Star, Trash2, Wallet } from 'lucide-react'
+import { useEffect, useMemo, useState, type FormEvent, type ChangeEvent } from 'react'
+import { Camera, CalendarDays, ChevronRight, CreditCard, Heart, LogOut, MapPin, Plus, Save, Search, Star, Trash2, Wallet } from 'lucide-react'
 import { BottomNav, PrimaryButton, ScreenHeader, StatusMessage } from '../../shared/components/MobileUi'
 import type { AppProfile } from '../auth/AuthProvider'
 import type { ProviderProfile } from '../providers/provider.types'
+import { getCustomerProfilePhoto, uploadCustomerProfilePhoto } from './member2.service'
 import { deleteCustomerAddress, deletePaymentMethod, listCustomerAddresses, listCustomerFeedback, listPaymentMethods, saveCustomerAddress, savePaymentMethod, submitCustomerFeedback, updateCustomerProfile, type CustomerAddress, type CustomerFeedback, type PaymentMethod } from './member2.service'
 const categories = ['All', 'Electrical', 'Plumbing', 'Cleaning', 'AC Repair', 'Painting', 'Carpentry']
 
@@ -29,6 +30,25 @@ export function Member2ProfileScreen({ profile, onBack, onNavigate, onProfileUpd
   const [phone, setPhone] = useState(profile.phone || '')
   const [status, setStatus] = useState('')
   const [saving, setSaving] = useState(false)
+  const [photo, setPhoto] = useState<{ path: string; url: string } | null>(null)
+  const [photoBusy, setPhotoBusy] = useState(false)
+  const [photoError, setPhotoError] = useState('')
+  useEffect(() => {
+    let active = true
+    setPhoto(null)
+    void getCustomerProfilePhoto(profile.id).then(value => { if (active) setPhoto(value) })
+      .catch(cause => { if (active) setPhotoError(member2ErrorMessage(cause, 'Unable to load your profile photo.')) })
+    return () => { active = false }
+  }, [profile.id])
+  async function changePhoto(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+    setPhotoBusy(true); setPhotoError('')
+    try { setPhoto(await uploadCustomerProfilePhoto(profile.id, file, photo?.path)) }
+    catch (cause) { setPhotoError(member2ErrorMessage(cause, 'Unable to save your profile photo.')) }
+    finally { setPhotoBusy(false) }
+  }
 
   async function save(e: FormEvent) {
     e.preventDefault()
@@ -49,9 +69,15 @@ export function Member2ProfileScreen({ profile, onBack, onNavigate, onProfileUpd
     <ScreenHeader title="My Profile" onBack={onBack}/>
     <main className="m1-scroll member2-screen">
       <div className="member2-profile-head">
-        <span className="m1-large-avatar">{(name || '').slice(0, 1).toUpperCase()}</span>
+        <label className="member2-profile-photo" aria-label="Add or change profile photo">
+          <span className="m1-large-avatar">{photo ? <img src={photo.url} alt="Your profile"/> : (name || '').slice(0, 1).toUpperCase()}</span>
+          <span className="member2-photo-camera"><Camera size={16}/></span>
+          <input type="file" accept="image/jpeg,image/png,image/webp" onChange={changePhoto} disabled={photoBusy}/>
+        </label>
         <div><h1>{name || 'Your profile'}</h1><p>Customer account</p></div>
       </div>
+      <p className="member2-photo-hint" role="status">{photoBusy ? 'Saving your photo…' : 'Tap the camera to add or change your photo. JPG, PNG or WebP, under 5 MB.'}</p>
+      {photoError && <StatusMessage kind="error">{photoError.includes('avatar_path') || photoError.includes('Bucket not found') ? 'Apply 20261011_member2_reviews_profile_photos.sql in Supabase to enable profile photos.' : photoError}</StatusMessage>}
       <form className="member2-card member2-form" onSubmit={save}>
         <label>Full name<input required minLength={2} value={name} onChange={e => setName(e.target.value)}/></label>
         <label>Email status<input value="Signed-in account" disabled/></label>
@@ -66,7 +92,7 @@ export function Member2ProfileScreen({ profile, onBack, onNavigate, onProfileUpd
         <Wallet/><span><strong>Payment options</strong><small>Manage safe payment preferences</small></span><ChevronRight/>
       </button>
       <button className="member2-link-card" onClick={() => onNavigate('reviews')}>
-        <Star/><span><strong>Provider reviews</strong><small>Browse ratings before you book</small></span><ChevronRight/>
+        <Star/><span><strong>Rate and Reviews</strong><small>Customer Reviews</small></span><ChevronRight/>
       </button>
       <button className="member2-link-card" onClick={() => onNavigate('feedback')}>
         <Heart/><span><strong>Send feedback</strong><small>Tell us about your experience</small></span><ChevronRight/>

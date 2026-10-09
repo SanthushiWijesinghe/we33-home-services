@@ -1,4 +1,39 @@
 import { requireSupabase } from '../../services/supabase/client'
+export type CustomerReview = { id: string; provider_id: string; provider_name: string; reviewer_name: string; rating: number; comment: string; created_at: string }
+export async function listCustomerReviews(): Promise<CustomerReview[]> {
+  const { data, error } = await requireSupabase().rpc('member2_list_customer_reviews')
+  if (error) throw new Error(error.message.includes('member2_list_customer_reviews') ? 'Apply 20261011_member2_reviews_profile_photos.sql in Supabase to load customer reviews.' : error.message)
+  return data as CustomerReview[]
+}
+const customerPhotoBucket = 'customer-profile-photos'
+async function signCustomerPhoto(path: string): Promise<string> {
+  const { data, error } = await requireSupabase().storage.from(customerPhotoBucket).createSignedUrl(path, 3600)
+  if (error) throw error
+  return data.signedUrl
+}
+export async function getCustomerProfilePhoto(userId: string): Promise<{ path: string; url: string } | null> {
+  const { data, error } = await requireSupabase().from('profiles').select('avatar_path').eq('id', userId).single()
+  if (error) throw error
+  return data.avatar_path ? { path: data.avatar_path, url: await signCustomerPhoto(data.avatar_path) } : null
+}
+export async function uploadCustomerProfilePhoto(userId: string, file: File, oldPath?: string): Promise<{ path: string; url: string }> {
+  const extensions: Record<string, string> = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp' }
+  if (!extensions[file.type] || file.size === 0 || file.size > 5 * 1024 * 1024) throw new Error('Choose a JPG, PNG or WebP photo under 5 MB.')
+  const client = requireSupabase()
+  const path = `${userId}/${crypto.randomUUID()}.${extensions[file.type]}`
+  const { error: uploadError } = await client.storage.from(customerPhotoBucket).upload(path, file, { contentType: file.type })
+  if (uploadError) throw uploadError
+  try {
+    const url = await signCustomerPhoto(path)
+    const { error } = await client.from('profiles').update({ avatar_path: path }).eq('id', userId).select('id').single()
+    if (error) throw error
+    if (oldPath && oldPath !== path) await client.storage.from(customerPhotoBucket).remove([oldPath]).catch(() => undefined)
+    return { path, url }
+  } catch (cause) {
+    await client.storage.from(customerPhotoBucket).remove([path])
+    throw cause
+  }
+}
 export type CustomerAddress = { id: string; label: string; address_line: string; is_default: boolean }
 export type PaymentMethod = { id: string; method_type: 'cash' | 'card' | 'mobile'; label: string; last_four: string | null; is_default: boolean }
 export type CustomerFeedback = { id: string; category: string; message: string; status: string; created_at: string }

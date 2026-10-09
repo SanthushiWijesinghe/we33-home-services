@@ -11,12 +11,13 @@ import { ProviderDetailScreen } from '../features/providers/ProviderDetailScreen
 import { ProviderDashboardScreen, ProviderRegistrationScreen } from '../features/providers/ProviderScreens'
 import { AdminDashboardScreen, AdminVerificationScreen } from '../features/admin/AdminScreens'
 import { BottomNav, ScreenHeader, StatusMessage } from '../shared/components/MobileUi'
-import { Member2FeedbackHistoryScreen, Member2FeedbackScreen, Member2LocationScreen, Member2PaymentScreen, Member2ProfileScreen, Member2ReviewsScreen, Member2ServiceFiltersScreen } from '../features/member2/Member2Screens'
+import { Member2FeedbackHistoryScreen, Member2FeedbackScreen, Member2LocationScreen, Member2PaymentScreen, Member2ProfileScreen, Member2ServiceFiltersScreen } from '../features/member2/Member2Screens'
 import { listApprovedProviders } from '../features/providers/provider.service'
 import type { ProviderProfile } from '../features/providers/provider.types'
 import { Member3AvailabilityScreen, Member3BookingScreen, Member3CategoriesScreen, Member3CustomerServicesScreen, Member3NotificationsScreen, Member3ProviderServicesScreen } from '../features/member3/Member3Screens'
 import type { Member3Service } from '../features/member3/member3.types'
 import { Member4BookingsScreen, Member4ProviderReviewsScreen, Member4SupportScreen } from '../features/member4/Member4Screens'
+import { Member2CustomerReviewsScreen } from '../features/member2/Member2CustomerReviewsScreen'
 
 type Screen = 'splash' | 'onboarding' | 'role' | 'login' | 'signup' | 'admin-login' | 'home' | 'search' |
   'provider-detail' | 'provider' | 'provider-register' | 'admin' | 'verification' | 'bookings' | 'profile' | 'earnings' | 'settings' | 'member2-filters' | 'location' | 'payments' | 'feedback' | 'feedback-history' | 'reviews' |
@@ -129,7 +130,7 @@ function MemberOneContent() {
   else if (screen === 'payments' && auth.profile.role === 'CUSTOMER') content = <Member2PaymentScreen profile={auth.profile} onBack={back}/>
   else if (screen === 'feedback' && auth.profile.role === 'CUSTOMER') content = <Member2FeedbackScreen profile={auth.profile} onBack={back} onNavigate={navigate}/>
   else if (screen === 'feedback-history' && auth.profile.role === 'CUSTOMER') content = <Member2FeedbackHistoryScreen profile={auth.profile} onBack={back}/>
-  else if (screen === 'reviews' && auth.profile.role === 'CUSTOMER') content = <Member2ReviewsScreen providers={providers} onBack={back} onProvider={selectProvider}/>
+  else if (screen === 'reviews' && auth.profile.role === 'CUSTOMER') content = <Member2CustomerReviewsScreen onBack={back} onNavigate={navigate}/>
   else if ((screen === 'earnings' && auth.profile.role === 'SERVICE_PROVIDER') || (screen === 'settings' && auth.profile.role === 'ADMIN')) content = <div className="m1-page">
     <ScreenHeader title={screen === 'settings' ? 'Admin Settings' : 'Earnings'} onBack={back}/><main className="m1-scroll m1-placeholder">
       <h1>{screen === 'settings' ? auth.profile.full_name : 'Earnings'}</h1>

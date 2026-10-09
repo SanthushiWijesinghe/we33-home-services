@@ -5,13 +5,23 @@ Member 2 owns customer discovery filters, profile preferences, saved service loc
 ## File ownership
 
 - `src/features/member2/Member2Screens.tsx` — Member 2 customer screens and user interactions.
+- `src/features/member2/Member2CustomerReviewsScreen.tsx` — Customer Reviews summary, rating breakdown, sorting and saved review cards.
 - `src/features/member2/member2.service.ts` — Member 2 Supabase reads and writes.
 - `src/styles/member-two.css` — Member 2-only visual styles.
 - `supabase/migrations/20261008_member2_customer_preferences.sql` — Member 2 tables, grants, indexes, and RLS policies.
+- `supabase/migrations/20261011_member2_reviews_profile_photos.sql` — Private customer photo storage, profile photo path, and review browsing RPC. Apply after the Member 4 migration.
 - `src/app/MemberOneApp.tsx` — shared route wiring only; the Member 2 screens are mounted here.
 - `src/features/discovery/SearchProvidersScreen.tsx` — shared search screen receives the Member 2 advanced-filter action.
 
 The migration stores only safe payment metadata (`method_type`, label, and optional last four digits). It never stores full card numbers or CVV values.
+
+## Customer Reviews and profile photos
+
+Owner: Member 2 (Nuleka). Profile → Rate and Reviews now opens the Customer Reviews screen. The summary uses the latest 200 actual reviews from approved providers; no sample ratings are inserted. Reviewer cards show first names without customer IDs, booking IDs or contact details. Write a Review opens Bookings, where Member 4 enforces completed-booking eligibility and owns review creation/edit/deletion.
+
+Profile → camera icon lets a customer select a JPG, PNG or WebP photo under 5 MB. The photo uploads to the private `customer-profile-photos` Supabase bucket, and `profiles.avatar_path` stores its location. Signed URLs display the image. Photos save immediately, separately from the name/phone Save changes form; reopen Profile to verify persistence. Storage policies restrict access to the photo owner.
+
+Run `20261011_member2_reviews_profile_photos.sql` in the shared Supabase SQL Editor before checking these features. SQL files in Git are not automatically applied to the remote database. Check Profile → camera → select photo → reopen Profile, then Rate and Reviews → sorting → Write a Review → completed booking. An account without completed appointments cannot write a verified review.
 
 ## Database setup for Member 2 screens
 
